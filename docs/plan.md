@@ -127,14 +127,14 @@
           - 스크립트의 동작과 연결 방식, 그 이유는 단계 파일에, 명령 구성은 design.md 테스트 전략에 적는다.
         - 완료 확인: `pnpm verify`가 통과하고, sitemap에 404를 뺀 모든 페이지가 `site` 기준 주소로 있으며 robots.txt에 sitemap 주소가 있다(`Disallow: /`는 유지). 일부러 한 페이지의 설명을 비우거나, 태그 하나를 빼거나, 404에 넣지 않기로 한 태그를 넣거나, sitemap 생성을 끄거나, 한 페이지의 noindex를 빼거나, 프로필의 한 줄 소개만 바꾸면 그때마다 검사가 실패한다. 브랜치에 push했을 때 CI의 빌드 작업에서 검사가 실행된다.
 
-8. 도메인 연결과 공개 — 상태: 대기
+8. 도메인 연결과 공개 — 상태: 진행 중
    - 목적: 사이트를 mivomad33.dev로 공개하고 운영을 시작한다.
    - 끝난 상태: mivomad33.dev(HTTPS)로 접속되고, 사이트 주소(`src/lib/site.ts`의 `SITE`, Astro `site` 설정이 이 값을 쓴다)가 이 도메인으로 바뀌어 sitemap과 대표 주소에 반영돼 있고, 4단계부터 유지한 검색 수집 차단이 풀려 있고, 샘플 포트폴리오와 테스트 글이 실제 내용으로 바뀌었거나 제거돼 있고(내용 준비는 사용자), 개요의 "성공의 모습"이 실제 사이트에서 확인된다(md push로 글 배포, 데이터 파일 수정으로 프로필·포트폴리오 반영).
    - 순서의 이유: 내용과 SEO가 갖춰진 뒤 공개해야 한다. 그 전까지는 기본 주소로 배포되더라도 4단계의 수집 차단으로 미완성 상태가 검색 엔진에 수집되지 않게 한다.
    - 세부: [stages/8-launch.md](stages/8-launch.md)
    - 진행 방식: 도메인은 Cloudflare에서 구매했다(네임서버도 Cloudflare). DNS, GitHub Pages, 검색 엔진 도구 설정은 Claude가 `gh`나 내장 브라우저로 직접 하고, 사용자는 로그인처럼 Claude가 할 수 없는 일만 한다.
    - 하위 단계:
-     1. 도메인 연결 — 상태: 대기
+     1. 도메인 연결 — 상태: 완료(2026-10-21)
         - 할 일: Cloudflare DNS에 GitHub Pages용 레코드를 넣고(루트 A·AAAA, `www` CNAME. GitHub이 인증서를 발급할 수 있게 프록시는 끄고 DNS만 쓴다), GitHub Pages의 사용자 지정 도메인을 mivomad33.dev로 정하고 HTTPS를 강제한다. 다른 사람이 이 도메인을 Pages에 연결하지 못하게 GitHub 계정에서 도메인 인증(TXT 레코드)을 하는데, 저장소에 도메인을 연결하기 전에 한다(연결과 인증 사이에 도메인을 가로채이지 않게 하기 위해서다). 루트 도메인을 대표 주소로 하고 `www`는 루트로 넘긴다. `src/lib/site.ts`의 `SITE`를 `https://mivomad33.dev`로 바꾼다. 수집 차단은 그대로 둔다. 레코드 값과 순서, 결정 이유는 단계 파일에 적는다.
         - 완료 확인: `pnpm verify`가 통과하고 빌드 결과의 canonical·OG·sitemap·robots.txt 주소가 새 도메인이다. 머지 뒤 `https://mivomad33.dev/`가 유효한 인증서로 열리고, `http://`, `www`, `mivomad33.github.io`가 모두 `https://mivomad33.dev/`로 넘어가며, 배포된 페이지에 noindex가 그대로 있다. GitHub 계정에서 도메인이 인증됨으로 보인다.
      2. 샘플 콘텐츠 제거 — 상태: 대기

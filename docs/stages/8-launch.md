@@ -2,7 +2,7 @@
 
 목적, 끝난 상태, 하위 단계는 [진행 계획](../plan.md)의 8단계를 따른다. 이 문서는 이 단계에서만 쓰는 구체적인 선택과 이유를 담고, 여러 단계가 따를 것은 [design.md](../design.md)에 적는다.
 
-- 상태: 진행 중
+- 상태: 진행 중. 하위 단계 1 완료(2026-10-21)
 
 ## 하위 단계 1: 도메인 연결
 
@@ -51,4 +51,9 @@
 - `https://mivomad33.dev/`가 200으로 열리고 인증서가 유효하다. `http://mivomad33.dev/`, `http://`·`https://www.mivomad33.dev/`, `https://mivomad33.github.io/`(하위 경로 포함)가 모두 301로 `https://mivomad33.dev/`의 같은 경로로 넘어간다.
 - 배포된 페이지에 noindex가 그대로 있다.
 - GitHub 계정의 Verified domains에 mivomad33.dev가 Verified로 보인다.
-- 남은 확인: 머지 뒤 배포된 canonical·sitemap이 새 주소인지.
+
+### 확인 결과(머지 뒤 배포, 2026-10-21)
+
+- main 머지 뒤 검증·빌드·배포가 모두 성공했다.
+- 배포된 홈·블로그 목록·글 보기·소개의 canonical, `og:url`, `og:image`가 `https://mivomad33.dev/` 기준이고 noindex가 있다. `og.png`가 열린다.
+- robots.txt는 `Disallow: /`와 `Sitemap: https://mivomad33.dev/sitemap-index.xml`이고, sitemap의 주소 9개가 모두 새 도메인이다. 배포된 HTML·robots.txt·sitemap에 `github.io`가 남아 있지 않다.
