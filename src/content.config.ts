@@ -1,6 +1,6 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
-import { yamlObjectLoader } from './lib/yaml-object-loader';
+import { yamlArrayLoader, yamlObjectLoader } from './lib/yaml-loader';
 
 // 링크: https:// 또는 mailto:로 시작하는 주소, 또는 /로 시작하는 사이트 안 주소.
 // //와 /\로 시작하는 주소는 브라우저가 외부 주소로 읽으므로 막는다(브라우저는 \를 /로 바꿔 읽는다).
@@ -26,4 +26,13 @@ const profile = defineCollection({
   }),
 });
 
-export const collections = { profile };
+const portfolio = defineCollection({
+  loader: yamlArrayLoader('src/data/portfolio.yaml'),
+  schema: z.strictObject({
+    name: z.string().min(1),
+    description: z.string().min(1),
+    links: z.array(linkSchema).default([]),
+  }),
+});
+
+export const collections = { profile, portfolio };

@@ -1,0 +1,22 @@
+# 포트폴리오. 파일에 적은 순서대로 표시하고, 홈에는 앞에서부터 3개를 보여 준다(새 항목은 맨 위에 적는다).
+# 형식: docs/design.md의 "데이터 파일 형식". 항목이 없으면 []를 적는다.
+# 아래는 샘플이며 8단계(공개) 전에 실제 내용으로 바꾼다.
+- name: 개인 사이트 mivomad33.dev
+  description: 프로필, 포트폴리오, 블로그를 담은 정적 사이트. Astro로 만들고 GitHub Pages로 배포한다.
+  links:
+    - label: 사이트
+      url: https://example.com
+    - label: GitHub
+      url: https://github.com/mivomad33
+- name: 사내 주문 관리 시스템 개편
+  description: 10년 넘게 쓰던 주문 관리 화면을 새로 만들었다. 화면마다 따로 있던 주문 조회·수정 로직을 하나로 모으고, 느리던 목록 화면의 응답 시간을 크게 줄였다. 사내 시스템이라 공개 링크는 없다.
+- name: 1인 사업용 랜딩 페이지 템플릿
+  description: 작은 서비스를 빠르게 알리기 위한 한 페이지짜리 템플릿.
+  links:
+    - label: GitHub
+      url: https://github.com/mivomad33
+- name: '오픈소스 기여: 시간대에 따라 날짜가 하루 밀리는 버그를 고친 날짜 처리 라이브러리 패치'
+  description: 날짜만 적은 값을 실행 환경의 시간대로 읽어 하루가 밀리던 버그를 고쳤다.
+  links:
+    - label: Pull Request
+      url: https://example.com/pr/1

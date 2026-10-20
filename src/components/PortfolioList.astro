@@ -1,0 +1,20 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PortfolioCard from './PortfolioCard.astro';
+
+// 포트폴리오 카드 목록. 포트폴리오 페이지와 홈의 최근 포트폴리오가 같이 쓴다.
+interface Props {
+  items: CollectionEntry<'portfolio'>['data'][];
+  headingLevel: 2 | 3;
+}
+
+const { items, headingLevel } = Astro.props;
+---
+
+<ul class="grid gap-7">
+  {
+    items.map((item) => (
+      <PortfolioCard item={item} headingLevel={headingLevel} />
+    ))
+  }
+</ul>

@@ -1,0 +1,36 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+// 포트폴리오 카드. 포트폴리오 페이지와 홈의 최근 포트폴리오가 같이 쓴다.
+interface Props {
+  item: CollectionEntry<'portfolio'>['data'];
+  // 명칭의 제목 단계. 포트폴리오 페이지는 h2, 홈은 영역 제목(h2) 아래이므로 h3.
+  headingLevel: 2 | 3;
+}
+
+const { item, headingLevel } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+---
+
+<li
+  class="flex flex-col gap-1.5 border-l-2 border-border pl-4 hover:border-accent"
+>
+  <Heading class="leading-tight font-bold">{item.name}</Heading>
+  <p class="text-muted">{item.description}</p>
+  {
+    item.links.length > 0 && (
+      <ul class="flex flex-wrap gap-4 text-sm">
+        {item.links.map(({ label, url }) => (
+          <li>
+            <a href={url} class="text-accent hover:underline">
+              <span class="font-mono" aria-hidden="true">
+                →{' '}
+              </span>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</li>

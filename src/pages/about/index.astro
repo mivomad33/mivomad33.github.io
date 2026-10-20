@@ -3,10 +3,37 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageTitle from '../../components/PageTitle.astro';
 import { getProfile } from '../../lib/profile';
 
-// 소개. 프로필 내용은 5단계에서 채운다.
+// 소개. 활동명, 한 줄 소개, 이메일, 링크. 링크가 없으면 링크 줄을 숨긴다.
 const profile = await getProfile();
 ---
 
 <BaseLayout title="소개">
   <PageTitle>{profile.name}</PageTitle>
+  <p class="-mt-6 mb-10 text-muted">{profile.intro}</p>
+  <dl class="grid grid-cols-label gap-x-6 gap-y-3 text-sm">
+    <dt class="text-muted">이메일:</dt>
+    <dd>
+      <a href={`mailto:${profile.email}`} class="text-accent hover:underline">
+        {profile.email}
+      </a>
+    </dd>
+    {
+      profile.links.length > 0 && (
+        <>
+          <dt class="text-muted">링크:</dt>
+          <dd>
+            <ul class="flex flex-wrap gap-4">
+              {profile.links.map(({ label, url }) => (
+                <li>
+                  <a href={url} class="text-accent hover:underline">
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </dd>
+        </>
+      )
+    }
+  </dl>
 </BaseLayout>
