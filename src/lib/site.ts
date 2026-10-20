@@ -2,8 +2,8 @@
 // Node가 타입 표기만 지워 실행할 수 있게 쓴다(다른 파일 import, enum 등 실행 코드가 되는 TS 문법을 쓰지 않는다).
 
 // 사이트 주소. astro.config.mjs의 site와 빌드 결과 검사가 이 값을 쓴다.
-// 도메인 연결 전 기본 주소이며, 8단계에서 https://mivomad33.dev로 바꾼다.
-export const SITE = 'https://mivomad33.github.io';
+// GitHub Pages에 연결한 도메인이다(8단계). 기본 주소(mivomad33.github.io)는 이 주소로 넘어간다.
+export const SITE = 'https://mivomad33.dev';
 
 // 검색 엔진 수집 허용 여부. 공개 전에는 false로 두어 모든 페이지에 noindex를 넣고 robots.txt로 전체를 막는다.
 // 8단계(공개)에서 true로 바꾼다.
