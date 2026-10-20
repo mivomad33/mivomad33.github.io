@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageTitle from '../../components/PageTitle.astro';
+import { getProfile } from '../../lib/profile';
+
+// 소개. 프로필 내용은 5단계에서 채운다.
+const profile = await getProfile();
+---
+
+<BaseLayout title="소개">
+  <PageTitle>{profile.name}</PageTitle>
+</BaseLayout>

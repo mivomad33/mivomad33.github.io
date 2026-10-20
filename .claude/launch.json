@@ -4,8 +4,24 @@
     {
       "name": "ui-mockups",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4400", "--directory", "docs/stages/3-ui-design"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4400",
+        "--directory",
+        "docs/stages/3-ui-design"
+      ],
       "port": 4400
+    },
+    {
+      "name": "site-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "preview",
+        "--port",
+        "4321"
+      ],
+      "port": 4321
     }
   ]
 }

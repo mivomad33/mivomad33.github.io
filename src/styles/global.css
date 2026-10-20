@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+/* 디자인 값(design.md 공통 UI). Tailwind 기본 값은 모두 지우고(--*: initial) 아래 값만 쓴다.
+   글자 크기에는 줄 간격 짝(--text-*--line-height)을 두지 않는다. 그래서 text-* 유틸리티는
+   줄 간격을 바꾸지 않고 부모 값을 이어받으며, 줄 간격은 leading-*로 따로 정한다. */
+@theme {
+  --*: initial;
+
+  --color-bg: #fcfcfc;
+  --color-surface: #f3f4f6;
+  --color-text: #1f2328;
+  --color-muted: #656d76;
+  --color-border: #d0d7de;
+  --color-accent: #1a7f37;
+
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --font-mono:
+    'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, Menlo,
+    monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.625rem;
+
+  --leading-tight: 1.4;
+  --leading-normal: 1.65;
+  --leading-relaxed: 1.8;
+
+  --font-weight-bold: 700;
+
+  --spacing: 0.25rem;
+  --container-content: 46rem;
+  --radius-sm: 0.25rem;
+  --breakpoint-sm: 40rem;
+}

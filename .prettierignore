@@ -1,0 +1,9 @@
+# 직접 쓰는 글과 데이터 파일은 스키마 검증이 형식을 맡는다(design.md 테스트 전략).
+src/content/blog/
+src/data/
+# 배포되지 않는 파일
+docs/
+CLAUDE.md
+.claude/
+.serena/
+pnpm-lock.yaml

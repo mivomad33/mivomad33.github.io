@@ -1,0 +1,121 @@
+---
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+import '@fontsource/jetbrains-mono/latin-400.css';
+import '@fontsource/jetbrains-mono/latin-700.css';
+import '../styles/global.css';
+import Container from '../components/Container.astro';
+import { getProfile } from '../lib/profile';
+import { ALLOW_INDEXING } from '../lib/site';
+
+interface Props {
+  // 페이지 제목. 없으면 사이트 이름만 쓴다(제목 형식의 세부는 7단계에서 정한다).
+  title?: string;
+}
+
+const { title } = Astro.props;
+const profile = await getProfile();
+const pageTitle = title ? `${title} - ${profile.name}` : profile.name;
+
+const menu = [
+  { href: '/portfolio/', label: '포트폴리오' },
+  { href: '/blog/', label: '블로그' },
+  { href: '/about/', label: '소개' },
+];
+// 현재 메뉴: 주소가 메뉴 주소로 시작하면 그 메뉴다(글 보기 /blog/<slug>/는 "블로그"). 홈은 표시 없음.
+const pathname = Astro.url.pathname;
+const isCurrent = (href: string) => pathname.startsWith(href);
+
+const footerLinks = [
+  { label: profile.email, url: `mailto:${profile.email}` },
+  ...profile.links,
+];
+const year = new Date().getFullYear();
+---
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {!ALLOW_INDEXING && <meta name="robots" content="noindex, nofollow" />}
+    <title>{pageTitle}</title>
+  </head>
+  <body
+    class="flex min-h-dvh flex-col bg-bg font-sans text-base leading-normal wrap-anywhere break-keep text-text"
+  >
+    <header class="border-b border-dashed border-border font-mono">
+      <Container
+        class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-5"
+      >
+        <a href="/" class="font-bold"
+          ><span class="text-accent">~/</span>{profile.name}</a
+        >
+        <nav aria-label="주 메뉴">
+          <ul class="flex gap-3 font-sans text-sm">
+            {
+              menu.map(({ href, label }) => {
+                const current = isCurrent(href);
+                return (
+                  <li>
+                    <a
+                      href={href}
+                      aria-current={current ? 'page' : undefined}
+                      class:list={
+                        current
+                          ? 'font-bold text-accent'
+                          : 'text-muted hover:text-text'
+                      }
+                    >
+                      <span
+                        class:list={[
+                          'font-mono',
+                          !current && 'text-transparent',
+                        ]}
+                        aria-hidden="true"
+                      >
+                        [
+                      </span>
+                      {label}
+                      <span
+                        class:list={[
+                          'font-mono',
+                          !current && 'text-transparent',
+                        ]}
+                        aria-hidden="true"
+                      >
+                        ]
+                      </span>
+                    </a>
+                  </li>
+                );
+              })
+            }
+          </ul>
+        </nav>
+      </Container>
+    </header>
+    <!-- 내용이 적어도 푸터가 화면 맨 아래에 붙도록 본문이 남는 높이를 채운다. -->
+    <main class="flex-1">
+      <Container class="pt-12 pb-16">
+        <slot />
+      </Container>
+    </main>
+    <footer
+      class="border-t border-dashed border-border font-mono text-sm text-muted"
+    >
+      <Container class="flex flex-wrap justify-between gap-3 py-8">
+        <p>© {year} {profile.name}</p>
+        <ul class="flex flex-wrap gap-4 font-sans">
+          {
+            footerLinks.map(({ label, url }) => (
+              <li>
+                <a href={url} class="hover:text-accent">
+                  {label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </Container>
+    </footer>
+  </body>
+</html>

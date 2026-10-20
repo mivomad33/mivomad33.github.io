@@ -1,0 +1,12 @@
+name: 실행 환경 준비
+description: pnpm과 Node를 설치하고 의존성을 설치한다(버전은 package.json의 packageManager와 .nvmrc를 따른다).
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v6
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+      shell: bash

@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getProfile } from '../lib/profile';
+
+// 홈. 최근 포트폴리오와 최근 글은 5·6단계에서 채운다.
+const profile = await getProfile();
+---
+
+<BaseLayout>
+  <p class="mb-14 text-xl leading-tight font-bold">
+    <span class="font-mono text-accent" aria-hidden="true">&gt; </span>{
+      profile.intro
+    }
+  </p>
+</BaseLayout>

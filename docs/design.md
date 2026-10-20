@@ -16,10 +16,11 @@
 - 데이터 검증: 블로그 글 정보와 프로필·포트폴리오 데이터 파일은 콘텐츠 컬렉션 스키마(Zod)로 정의해, 빠지거나 틀리면 빌드가 실패하게 한다.
 - 배포: GitHub Actions에서 검증 → 빌드 → GitHub Pages 배포(공식 `actions/upload-pages-artifact`, `actions/deploy-pages`). 검증이나 빌드가 실패하면 배포하지 않는다.
 - 저장소: GitHub `mivomad33/mivomad33.github.io`(사용자 사이트). 기본 주소가 루트(`https://mivomad33.github.io/`)라서 도메인 연결 전후로 경로(`base`)가 바뀌지 않는다. 저장소는 4단계에서 만든다.
-- SEO: sitemap은 `@astrojs/sitemap`. 메타 태그(noindex 포함)는 공통 레이아웃에서, robots.txt는 별도 파일로 라이브러리 없이 직접 만든다. 공개 전 수집 차단과 그 전환 방식은 4단계에서, 메타 태그 세부는 7단계에서 정한다.
+- SEO: sitemap은 `@astrojs/sitemap`. 메타 태그(noindex 포함)는 공통 레이아웃에서, robots.txt는 라이브러리 없이 직접 만든다(`src/pages/robots.txt.ts`). 메타 태그 세부는 7단계에서 정한다.
+  - 공개 전 수집 차단: `src/lib/site.ts`의 `ALLOW_INDEXING` 값 하나로 모든 페이지의 noindex와 robots.txt(`Disallow: /`)를 함께 켜고 끈다. 지금은 `false`이고 8단계에서 `true`로 바꾼다. 이유는 [4단계 문서](stages/4-foundation.md#공개-전-수집-차단)에 있다.
 - 검증 도구: `astro check`(타입 검사, `@astrojs/check`와 `typescript` 설치 필요), ESLint, Prettier 검사(`--check`). E2E 도구는 쓰지 않는다.
-- 실행 환경: Node 22.22 이상(Astro 7 요구). 로컬과 CI가 같은 버전을 쓴다.
-- 버전: 설치할 때의 최신 안정 버전을 쓰되, 서로의 peer 의존성 범위 안에서 정한다. 지금은 TypeScript 최신(7.x)을 타입 검사·lint 도구가 지원하지 않아 6.x를 쓴다.
+- 실행 환경: Node 24.16 이상(`eslint-plugin-astro` 요구. Astro 7은 22.22 이상). 로컬과 CI가 같은 버전을 쓴다(`.nvmrc`의 주 버전, `package.json`의 `packageManager`의 pnpm 버전).
+- 버전: 설치할 때 공개된 지 하루 이상 지난 것 중 최신 안정 버전을 쓰되, 서로의 peer 의존성 범위 안에서 정한다. pnpm(12.x)의 기본 공급망 보호 정책(`minimumReleaseAge`, 1일)을 따르는 것이다. 악성 버전이 공개 직후 설치되는 것을 막고, 이 정책이 CI 설치에서도 lockfile을 검사하기 때문이다([4단계 문서](stages/4-foundation.md#패키지와-버전)). 지금은 TypeScript 최신(7.x)을 타입 검사·lint 도구가 지원하지 않아 6.x를 쓴다.
 
 ## 페이지 구성과 URL
 
@@ -53,11 +54,14 @@
 
 - 공통 규칙:
   - 모든 데이터는 콘텐츠 컬렉션 스키마로 검증하고, 필수 값이 빠지거나 형식이 틀리면 빌드가 실패한다.
-  - 사용자는 아래 필드만 적는다(`id` 같은 추가 값을 요구하지 않는다).
-  - 링크는 `label`(링크명, 필수, 문자열)과 `url`(링크 주소, 필수, `https://`나 `mailto:`로 시작하는 주소, 또는 `/`로 시작하는 사이트 안 주소. 예: `/blog/first-post/`. `//`로 시작하는 주소는 외부 주소이므로 막는다. 사이트 안 주소가 실제로 있는지는 검사하지 않는다) 두 필드다.
-  - 로더 구성 등 읽는 방법의 세부는 5단계(프로필·포트폴리오)와 6단계(블로그)에서 정한다. Astro 기본 파일 로더의 동작을 5단계 시작 때 공식 문서로 확인한다. 확인할 것:
-    - 배열 파일(포트폴리오): 항목마다 `id`를 요구하거나 읽는 순서를 보장하지 않을 수 있다. 그러면 로더가 배열의 위치로 `id`를 만들고, 가져올 때 그 위치 순으로 정렬한다.
-    - 단일 객체 파일(프로필): 최상위 키(`name`, `intro` 등)를 각각 다른 항목으로 나눠 읽을 수 있다. 그러면 파일 전체를 항목 하나로 읽는 방법을 고른다.
+  - 사용자는 아래 필드만 적는다(`id` 같은 추가 값을 요구하지 않는다). 다른 키를 적으면 빌드가 실패한다. `links`를 `link`로 잘못 쓰는 것 같은 오타가 조용히 무시되지 않게 하기 위해서다.
+  - 링크는 `label`(링크명, 필수, 문자열)과 `url`(링크 주소, 필수, `https://`나 `mailto:`로 시작하는 주소, 또는 `/`로 시작하는 사이트 안 주소. 예: `/blog/first-post/`. `//`와 `/\`로 시작하는 주소는 브라우저가 외부 주소로 읽으므로 막는다. `https://`와 `mailto:` 뒤에는 내용이 있어야 한다. 사이트 안 주소가 실제로 있는지는 검사하지 않는다) 두 필드다.
+  - 프로필은 헤더·푸터가 쓰므로 4단계에서 만들었다. 포트폴리오 로더는 5단계, 블로그 로더는 6단계에서 정한다.
+  - Astro 기본 파일 로더(`file()`)의 동작(4단계에서 Astro 7.4 소스로 확인했다):
+    - 단일 객체 파일: 최상위 키(`name`, `intro` 등)를 각각 다른 항목으로 나눠 읽는다.
+    - 배열 파일: 항목마다 `id`(또는 `slug`) 필드를 요구한다. 위 공통 규칙과 맞지 않는다.
+    - 파일을 읽지 못하면(YAML 문법 오류 등) 로그만 남기고, 이전 빌드에서 저장해 둔 데이터를 그대로 써서 빌드가 성공해 버린다.
+  - 그래서 프로필은 파일 전체를 항목 하나로 읽고 읽기 오류에서 빌드를 멈추는 로더(`src/lib/yaml-object-loader.ts`)를 직접 만들어 쓴다. 포트폴리오(5단계)도 같은 문제를 피하는 로더가 필요하다(배열의 위치로 `id`를 만들고 그 순서로 정렬).
 - 프로필: `src/data/profile.yaml`
   - `name`: 활동명(필수)
   - `intro`: 한 줄 소개(필수)
@@ -113,12 +117,13 @@ date: 2026-10-20
 
 Astro 기본 구조를 따른다. `src/` 아래에 이 목록에 없는 폴더나 역할이 다른 파일을 새로 만들 때는 이 목록에 먼저 추가한다. 루트의 설정 파일(`astro.config.*`, `package.json`, ESLint·Prettier 설정 등)은 4단계에서 만들며 목록에 적지 않는다.
 
-- `.github/workflows/`: 검증·빌드·배포 워크플로(4단계)
+- `.github/workflows/`: 검증·빌드·배포 워크플로(`deploy.yml`)
+- `.github/actions/`: 워크플로의 작업들이 같이 쓰는 단계(`setup/`: pnpm·Node·의존성 설치)
 - `public/`: 가공 없이 그대로 복사할 파일(파비콘 등)
-- `src/pages/`: 페이지. 파일 위치가 곧 URL이다(`index.astro`, `portfolio/index.astro`, `about/index.astro`, `blog/index.astro`, `blog/[slug].astro`, `404.astro`).
+- `src/pages/`: 페이지. 파일 위치가 곧 URL이다(`index.astro`, `portfolio/index.astro`, `about/index.astro`, `blog/index.astro`, `blog/[slug].astro`, `404.astro`). `robots.txt.ts`는 robots.txt를 만든다.
 - `src/layouts/`: 공통 레이아웃(`BaseLayout.astro`)
 - `src/components/`: 여러 곳에서 쓰는 UI 부품
-- `src/lib/`: 여러 페이지가 쓰는 로직(글 목록 정렬, 날짜 표시 등)
+- `src/lib/`: 여러 페이지가 쓰는 로직(글 목록 정렬, 날짜 표시, 데이터 가져오기, 콘텐츠 로더, 사이트 설정 값 등)
 - `src/content/blog/`: 블로그 글 md
 - `src/data/`: 프로필·포트폴리오 데이터 파일
 - `src/styles/global.css`: Tailwind 불러오기와 테마(`@theme`)
@@ -136,6 +141,7 @@ lint·포맷터가 자동으로 잡는 것은 적지 않는다.
   - Tailwind 클래스를 마크업에 쓴다. 색·글꼴·간격 등은 `@theme`에 정의한 값만 쓰고, 임의 값(`text-[13px]`, `bg-[#333]`)과 인라인 스타일을 쓰지 않는다. 필요한 값이 없으면 테마에 추가한다.
   - 반복되는 클래스 묶음은 `@apply`가 아니라 컴포넌트로 뽑는다.
   - 컴포넌트의 `<style>`은 Tailwind 클래스로 할 수 없는 경우(예: md 본문처럼 마크업을 직접 쓰지 않는 영역)에만 쓴다.
+- Node 전역 변수: `src/`에서는 `process`, `Buffer` 같은 Node 전역 변수를 쓰지 않는다(lint로 막는다). Node 기능이 필요하면(콘텐츠 로더 등) `node:` 모듈을 import한다.
 - 클라이언트 JS: 기본으로 쓰지 않는다. UI 프레임워크(React 등)와 `client:*` 지시어를 쓰지 않는다. 꼭 필요하면 이유를 해당 단계 문서에 적는다.
 - TypeScript: 컴포넌트 props는 `Props` 인터페이스로 정의한다. `any`를 쓰지 않는다.
 - 마크업: 의미에 맞는 태그를 쓴다(`header`, `nav`, `main`, `article`, `footer`). `<html lang="ko">`. 이미지에는 `alt`를 넣는다.
@@ -143,7 +149,8 @@ lint·포맷터가 자동으로 잡는 것은 적지 않는다.
 
 ## 테스트 전략
 
-- 빌드 시점 검증(필수): 다음이 모두 통과해야 배포한다. 로컬에서도 같은 명령으로 확인한다. 명령 구성은 4단계에서 만든다.
+- 빌드 시점 검증(필수): 다음이 모두 통과해야 배포한다. 로컬에서도 같은 명령으로 확인한다.
+  - 명령: `pnpm check`(타입 검사, lint, 포맷 검사), `pnpm build`(빌드), `pnpm verify`(둘을 차례로. 로컬에서 머지 전에 실행한다). 구성 이유는 [4단계 문서](stages/4-foundation.md#검증-명령)에 있다.
   - 타입 검사: `astro check`
   - lint: ESLint
   - 포맷 검사: Prettier `--check`. 글(`src/content/blog/`)과 데이터 파일(`src/data/`)은 검사에서 뺀다(`.prettierignore`). 직접 쓴 글의 형식이 포맷 규칙과 조금 달라도 배포가 막히지 않게 하기 위해서다. 이 파일들의 형식은 스키마 검증이 맡는다. `docs/`와 `CLAUDE.md`도 배포되는 파일이 아니므로 검사에서 뺀다.
@@ -161,7 +168,7 @@ lint·포맷터가 자동으로 잡는 것은 적지 않는다.
 
 ### 디자인 값
 
-`src/styles/global.css`의 `@theme`에 아래 이름 그대로 정의한다. Tailwind 기본 색은 지우고(`--color-*: initial`) 아래 색만 쓴다. 다른 항목의 기본 값을 지울지는 4단계에서 정한다.
+`src/styles/global.css`의 `@theme`에 아래 이름 그대로 정의한다. Tailwind 기본 값은 모두 지우고(`--*: initial`) 아래 값만 쓴다. 그래서 아래에 없는 값(예: `text-red-500`, `shadow-md`)은 클래스가 만들어지지 않는다. 화면 폭 기준(`--breakpoint-sm: 40rem`)도 함께 다시 정의한다.
 
 - 색:
   - `--color-bg: #fcfcfc` 배경
@@ -175,7 +182,7 @@ lint·포맷터가 자동으로 잡는 것은 적지 않는다.
   - `--font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif`
   - `--font-mono: 'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, Menlo, monospace`
 - 글자 크기: `--text-xs: 0.75rem`, `--text-sm: 0.8125rem`, `--text-base: 0.9375rem`, `--text-lg: 1.0625rem`, `--text-xl: 1.25rem`, `--text-2xl: 1.625rem`
-  - Tailwind의 글자 크기 유틸리티는 크기마다 기본 줄 간격도 함께 적용하므로, 4단계에서 `--text-*--line-height`를 정하거나 줄 간격 유틸리티를 함께 써서 아래 줄 간격과 맞춘다.
+  - 글자 크기에는 줄 간격 짝(`--text-*--line-height`)을 두지 않는다. 그래서 `text-*`는 글자 크기만 바꾸고 줄 간격은 부모 값을 이어받는다(본문은 `leading-normal`, 글 본문은 `leading-relaxed`). 제목처럼 다른 줄 간격이 필요한 곳은 `leading-*`를 함께 쓴다. 시안이 글자 크기와 줄 간격을 따로 정한 것과 같은 방식이다.
 - 줄 간격: `--leading-tight: 1.4`(제목), `--leading-normal: 1.65`(기본), `--leading-relaxed: 1.8`(글 본문)
 - 굵기: 보통(400)과 굵게(`--font-weight-bold: 700`) 두 가지만 쓴다.
 - Tailwind의 기본 스타일 초기화(preflight)는 제목(`h1`~`h6`)의 굵기·크기와 목록 기호를 지운다. 아래에서 "굵게"나 목록 기호를 적은 곳은 클래스나 본문 스타일로 직접 지정한다(시안은 브라우저 기본 스타일 덕분에 굵게 보인다).
@@ -189,7 +196,9 @@ lint·포맷터가 자동으로 잡는 것은 적지 않는다.
 - 한글이 들어가는 문장(제목, 소개, 링크명, 메뉴, 화면 문구)은 `font-sans`로 쓴다. JetBrains Mono에는 한글이 없고 공백이 넓어, 한글 문장에 쓰면 띄어쓰기가 벌어져 보이기 때문이다.
 - `font-mono`는 기호(`~/`, `#`, `##`, `>`, `[ ]`, `→`, `←`), 날짜, 사이트 이름, 코드에만 쓴다.
   - 화살표 `→`, `←`는 JetBrains Mono의 라틴 부분 집합에 없어 실제로는 대체 글꼴(Pretendard)로 표시된다. 시안도 같은 모양이므로 그대로 둔다.
-- 웹 폰트는 CDN이 아니라 npm 패키지로 설치해 사이트와 함께 배포한다(Pretendard 가변 글꼴의 dynamic subset, JetBrains Mono의 400·700 굵기와 라틴 문자만). 외부 서버에 요청하지 않아 방문자 정보가 넘어가지 않고, 버전이 lockfile로 고정되기 때문이다. 패키지 이름과 불러오는 방법은 4단계에서 정한다.
+- 웹 폰트는 CDN이 아니라 npm 패키지로 설치해 사이트와 함께 배포한다(Pretendard 가변 글꼴의 dynamic subset, JetBrains Mono의 400·700 굵기와 라틴 문자만). 외부 서버에 요청하지 않아 방문자 정보가 넘어가지 않고, 버전이 lockfile로 고정되기 때문이다.
+  - 패키지: `pretendard`(`dist/web/variable/pretendardvariable-dynamic-subset.css`), `@fontsource/jetbrains-mono`(`latin-400.css`, `latin-700.css`)
+  - 불러오는 방법: `BaseLayout`에서 CSS를 import한다. 빌드할 때 글꼴 파일이 사이트에 함께 들어가고, 브라우저는 페이지에 쓰인 글자의 부분 집합만 받는다.
 - 한글은 단어 단위로 줄바꿈하고(`word-break: keep-all`), 긴 주소처럼 끊을 곳이 없는 문자열은 아무 데서나 줄바꿈해(`overflow-wrap: anywhere`) 화면 밖으로 넘치지 않게 한다.
 
 ### 날짜 표시
@@ -205,7 +214,9 @@ lint·포맷터가 자동으로 잡는 것은 적지 않는다.
   - 현재 메뉴: 강조색 굵은 글자를 `[블로그]`처럼 고정폭 괄호로 감싼다. 다른 메뉴에도 투명한 괄호를 둬, 현재 메뉴가 바뀌어도 글자 위치가 움직이지 않게 한다.
   - 화면이 좁아 한 줄에 들어가지 않으면 메뉴가 사이트 이름 아래 줄로 내려간다.
 - 푸터: 위에 점선 구분선. 왼쪽에 저작권 표시(고정폭), 오른쪽에 이메일과 링크(흐린 글자색).
+  - 내용이 적어도 푸터는 화면 맨 아래에 붙는다(`<body>`에 화면 높이 `min-h-dvh`를 최소로 주고 `<main>`이 남는 높이를 채운다). 시안은 내용 바로 뒤에 붙어 내용이 적으면 화면 중간에 떠 보였기 때문이다. 휴대폰 주소창이 나타났다 사라져도 맞도록 `dvh`를 쓴다.
 - 페이지 제목(`h1`): `text-2xl` 굵게, 앞에 강조색 `# `(고정폭).
+- 404: 페이지 제목 아래에 "홈으로 가기" 링크(강조색, 마우스를 올리면 밑줄). 시안은 일반 글자색이지만 링크로 보이지 않아 바꿨다.
 - 홈의 한 줄 소개: `text-xl` 굵게, 앞에 강조색 `> `(고정폭).
 - 홈의 영역 제목: 굵게, 앞에 강조색 `## `(고정폭). 오른쪽에 "전체 보기 →"(`text-sm`, 흐린 글자색).
 

@@ -1,0 +1,12 @@
+---
+// 본문 폭(최대 46rem)과 좌우 여백을 맞춘 영역. 헤더, 본문, 푸터가 같은 폭을 쓴다.
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={['mx-auto max-w-content px-5', className]}>
+  <slot />
+</div>
