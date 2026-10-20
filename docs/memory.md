@@ -8,3 +8,4 @@
 - 2026-10-20: 작업 흐름 스킬(understand-project, check-plan, check-next, do-next, review-done)은 이 저장소가 아니라 `~/.claude/skills/`(모든 프로젝트 공용)에 둔다. 특정 프로젝트에 묶이지 않는 내용이라 다른 프로젝트에서도 쓰기 위해서다. 스킬을 고칠 때는 그 위치에서 고친다(이 저장소에서 버전 관리되지 않는다).
 - 2026-10-20: 이 Mac의 키체인 GitHub 인증은 다른 GitHub 계정이라, 이 저장소만 로컬 git 설정으로 `gh auth git-credential`(mivomad33 계정 로그인, 워크플로 파일을 올리려면 `workflow` 권한 필요)을 쓰게 했다(`git config --local credential.https://github.com.helper`). 다른 저장소의 인증에 영향을 주지 않기 위해서다. 그래서 전역 설정(`gh auth setup-git`)은 쓰지 않는다. 다시 클론하면 이 로컬 설정을 다시 넣어야 한다.
 - 2026-10-20: 이 저장소의 커밋 작성자는 `mivomad33 <344780894+mivomad33@users.noreply.github.com>`(GitHub 비공개 주소)이다(로컬 git 설정). 공개 저장소의 커밋 기록에 개인 이메일이 드러나지 않게 하기 위해서다. 첫 push 전에 기존 커밋의 작성자도 모두 이 값으로 바꿨다. 문서에도 개인 이메일이나 다른 계정 이름을 적지 않는다.
+- 2026-10-21: 외부 서비스 설정(DNS, GitHub 설정, 검색 엔진 도구 등)은 사용자에게 넘기지 말고 Claude가 `gh`나 내장 브라우저로 직접 한다. 사용자에게는 로그인처럼 Claude가 할 수 없는 일만 넘긴다(사용자 요청).
