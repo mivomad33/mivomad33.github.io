@@ -7,8 +7,9 @@ import { getProfile } from '../lib/profile';
 import { getRecentPortfolio } from '../lib/portfolio';
 import { getRecentPosts } from '../lib/blog';
 
-// 홈. 한 줄 소개, 최근 포트폴리오, 최근 글. 항목이 0개인 영역은 숨긴다.
-// 한 줄 소개와 영역들을 한 격자 간격으로 쌓아, 영역이 모두 숨겨져도 빈 여백이 남지 않게 한다.
+// 홈. 최근 포트폴리오, 최근 글. 항목이 0개인 영역은 숨긴다.
+// 한 줄 소개는 소개 페이지에 있으므로 홈에는 두지 않는다(설명 메타 태그에만 쓴다).
+// 영역들을 한 격자 간격으로 쌓아, 영역 하나가 숨겨져도 빈 여백이 남지 않게 한다.
 const profile = await getProfile();
 const recentPortfolio = await getRecentPortfolio();
 const recentPosts = await getRecentPosts();
@@ -18,11 +19,6 @@ const recentPosts = await getRecentPosts();
   <!-- 헤더의 사이트 이름이 제목 역할을 하므로, 페이지 제목(h1)은 화면에 보이지 않게 둔다(7단계). -->
   <h1 class="sr-only">{profile.name}</h1>
   <div class="grid gap-14">
-    <p class="text-xl leading-tight font-bold">
-      <span class="font-mono text-accent" aria-hidden="true">&gt; </span>{
-        profile.intro
-      }
-    </p>
     {
       recentPortfolio.length > 0 && (
         <HomeSection title="최근 포트폴리오" moreHref="/portfolio/">
