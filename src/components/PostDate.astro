@@ -1,0 +1,16 @@
+---
+import { formatDate } from '../lib/format-date';
+
+// 날짜 하나(<time>). 고정폭, text-sm, 흐린 글자색. 글 목록과 글 보기가 같이 쓴다.
+interface Props {
+  date: Date;
+  class?: string;
+}
+
+const { date, class: className } = Astro.props;
+const value = formatDate(date);
+---
+
+<time datetime={value} class:list={['font-mono text-sm text-muted', className]}
+  >{value}</time
+>

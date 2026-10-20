@@ -1,5 +1,6 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
+import { blogLoader } from './lib/blog-loader';
 import { yamlArrayLoader, yamlObjectLoader } from './lib/yaml-loader';
 
 // 링크: https:// 또는 mailto:로 시작하는 주소, 또는 /로 시작하는 사이트 안 주소.
@@ -35,4 +36,25 @@ const portfolio = defineCollection({
   }),
 });
 
-export const collections = { profile, portfolio };
+// 날짜: YYYY-MM-DD 형식의 실제 날짜(2026-02-30 같은 값은 실패). UTC 자정의 Date로 바꾼다.
+// 로더가 frontmatter의 날짜를 문자열 그대로 넘긴다(blog-loader.ts).
+const dateSchema = z.iso
+  .date({ error: 'YYYY-MM-DD 형식의 날짜여야 합니다(예: 2026-10-20).' })
+  .transform((value) => new Date(value));
+
+const blog = defineCollection({
+  loader: blogLoader(),
+  schema: z
+    .strictObject({
+      title: z.string().min(1),
+      description: z.string().min(1),
+      date: dateSchema,
+      updated: dateSchema.optional(),
+    })
+    .refine(({ date, updated }) => !updated || updated >= date, {
+      message: 'updated(수정일)는 date(게시일)보다 이를 수 없습니다.',
+      path: ['updated'],
+    }),
+});
+
+export const collections = { profile, portfolio, blog };

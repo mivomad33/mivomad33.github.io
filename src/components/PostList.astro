@@ -1,0 +1,20 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PostListItem from './PostListItem.astro';
+
+// 글 목록. 글 목록 페이지와 홈의 최근 글이 같이 쓴다.
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  headingLevel: 2 | 3;
+}
+
+const { posts, headingLevel } = Astro.props;
+---
+
+<ul class="grid gap-6">
+  {
+    posts.map((post) => (
+      <PostListItem post={post} headingLevel={headingLevel} />
+    ))
+  }
+</ul>

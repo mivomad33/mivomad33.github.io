@@ -1,10 +1,21 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import EmptyNotice from '../../components/EmptyNotice.astro';
 import PageTitle from '../../components/PageTitle.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts } from '../../lib/blog';
 
-// 글 목록. 목록은 6단계에서 채운다.
+// 글 목록. 모든 글을 게시일 최신순으로 한 페이지에 보여 준다.
+const posts = await getPosts();
 ---
 
 <BaseLayout title="블로그">
   <PageTitle>블로그</PageTitle>
+  {
+    posts.length > 0 ? (
+      <PostList posts={posts} headingLevel={2} />
+    ) : (
+      <EmptyNotice />
+    )
+  }
 </BaseLayout>

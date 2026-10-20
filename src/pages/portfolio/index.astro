@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import EmptyNotice from '../../components/EmptyNotice.astro';
 import PageTitle from '../../components/PageTitle.astro';
 import PortfolioList from '../../components/PortfolioList.astro';
 import { getPortfolio } from '../../lib/portfolio';
@@ -14,7 +15,7 @@ const portfolio = await getPortfolio();
     portfolio.length > 0 ? (
       <PortfolioList items={portfolio} headingLevel={2} />
     ) : (
-      <p class="text-muted">아직 항목이 없습니다.</p>
+      <EmptyNotice />
     )
   }
 </BaseLayout>

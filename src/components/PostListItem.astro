@@ -1,0 +1,25 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PostDate from './PostDate.astro';
+
+// 글 목록 항목. 넓은 화면에서는 날짜를 왼쪽 칸에, 제목과 설명을 오른쪽 칸에 두고, 좁은 화면에서는 날짜·제목·설명 순서로 쌓는다.
+// 글 목록과 홈의 최근 글이 같이 쓴다.
+interface Props {
+  post: CollectionEntry<'blog'>;
+  // 제목의 제목 단계. 글 목록은 h2, 홈은 영역 제목(h2) 아래이므로 h3.
+  headingLevel: 2 | 3;
+}
+
+const { post, headingLevel } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+---
+
+<li class="grid gap-x-5 gap-y-0.5 sm:grid-cols-label">
+  <PostDate date={post.data.date} class="pt-0.5" />
+  <Heading class="leading-tight font-bold">
+    <a href={`/blog/${post.id}/`} class="hover:text-accent hover:underline"
+      >{post.data.title}</a
+    >
+  </Heading>
+  <p class="text-sm text-muted sm:col-start-2">{post.data.description}</p>
+</li>
