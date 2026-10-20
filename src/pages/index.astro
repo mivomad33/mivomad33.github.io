@@ -14,7 +14,9 @@ const recentPortfolio = await getRecentPortfolio();
 const recentPosts = await getRecentPosts();
 ---
 
-<BaseLayout>
+<BaseLayout description={profile.intro}>
+  <!-- 헤더의 사이트 이름이 제목 역할을 하므로, 페이지 제목(h1)은 화면에 보이지 않게 둔다(7단계). -->
+  <h1 class="sr-only">{profile.name}</h1>
   <div class="grid gap-14">
     <p class="text-xl leading-tight font-bold">
       <span class="font-mono text-accent" aria-hidden="true">&gt; </span>{

@@ -1,0 +1,25 @@
+/* OG 이미지 원본이 쓰는 글꼴과 크기. 사이트와 같은 글꼴 파일을 node_modules에서 읽는다. */
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 400;
+  src: url('../../../node_modules/pretendard/dist/public/static/Pretendard-Regular.otf');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 700;
+  src: url('../../../node_modules/pretendard/dist/public/static/Pretendard-Bold.otf');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-weight: 400;
+  src: url('../../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-weight: 700;
+  src: url('../../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2');
+}
+* { margin: 0; box-sizing: border-box; }
+html, body { width: 1200px; height: 630px; overflow: hidden; }
+body { font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
+.mono { font-family: 'JetBrains Mono', 'Pretendard', monospace; }

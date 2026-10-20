@@ -22,7 +22,11 @@ const pager = [
 ].filter((link) => !!link);
 ---
 
-<BaseLayout title={post.data.title}>
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  article={{ published: post.data.date, modified: post.data.updated }}
+>
   <article>
     <header class="mb-10">
       <h1 class="text-2xl leading-tight font-bold">{post.data.title}</h1>

@@ -16,7 +16,9 @@
 - 데이터 검증: 블로그 글 정보와 프로필·포트폴리오 데이터 파일은 콘텐츠 컬렉션 스키마(Zod)로 정의해, 빠지거나 틀리면 빌드가 실패하게 한다.
 - 배포: GitHub Actions에서 검증 → 빌드 → GitHub Pages 배포(공식 `actions/upload-pages-artifact`, `actions/deploy-pages`). 검증이나 빌드가 실패하면 배포하지 않는다.
 - 저장소: GitHub `mivomad33/mivomad33.github.io`(사용자 사이트). 기본 주소가 루트(`https://mivomad33.github.io/`)라서 도메인 연결 전후로 경로(`base`)가 바뀌지 않는다. 저장소는 4단계에서 만든다.
-- SEO: sitemap은 `@astrojs/sitemap`. 메타 태그(noindex 포함)는 공통 레이아웃에서, robots.txt는 라이브러리 없이 직접 만든다(`src/pages/robots.txt.ts`). 메타 태그 세부는 7단계에서 정한다.
+- SEO: sitemap은 `@astrojs/sitemap`(`astro.config.mjs`의 통합. `sitemap-index.xml`과 `sitemap-0.xml`을 만들고 404는 스스로 뺀다). 메타 태그(noindex 포함)는 공통 레이아웃에서, robots.txt는 라이브러리 없이 직접 만든다(`src/pages/robots.txt.ts`). 메타 태그 규칙은 아래 [메타 태그](#메타-태그)에 있다.
+  - 사이트 주소: `src/lib/site.ts`의 `SITE` 하나를 `astro.config.mjs`의 `site`와 빌드 결과 검사가 같이 쓴다. 절대 주소는 같은 파일의 `siteUrl()`로 만든다. 8단계에서 이 값을 도메인으로 바꾼다.
+  - robots.txt에는 수집 허용 여부와 관계없이 sitemap 주소(`Sitemap: <사이트 주소>/sitemap-index.xml`)를 넣는다.
   - 공개 전 수집 차단: `src/lib/site.ts`의 `ALLOW_INDEXING` 값 하나로 모든 페이지의 noindex와 robots.txt(`Disallow: /`)를 함께 켜고 끈다. 지금은 `false`이고 8단계에서 `true`로 바꾼다. 이유는 [4단계 문서](stages/4-foundation.md#공개-전-수집-차단)에 있다.
 - 검증 도구: `astro check`(타입 검사, `@astrojs/check`와 `typescript` 설치 필요), ESLint, Prettier 검사(`--check`). E2E 도구는 쓰지 않는다.
 - 실행 환경: Node 24.16 이상(`eslint-plugin-astro` 요구. Astro 7은 22.22 이상). 로컬과 CI가 같은 버전을 쓴다(`.nvmrc`의 주 버전, `package.json`의 `packageManager`의 pnpm 버전).
@@ -29,7 +31,7 @@
 - 경로는 루트에서 시작하고(사용자 사이트 저장소), 도메인 연결 전후로 같다.
 - 모든 페이지 주소는 끝에 슬래시를 붙인다(Astro `trailingSlash: 'always'`). 내부 링크도 슬래시를 붙여 쓴다.
 - 페이지:
-  - `/`: 홈. 맨 위 한 줄 소개(프로필의 `intro`. 이름은 헤더에 있으므로 반복하지 않는다), 그 아래 최근 포트폴리오 3개와 최근 글 3개. 영역마다 전체 목록(`/portfolio/`, `/blog/`) 링크를 둔다. 항목이 3개보다 적으면 있는 만큼, 0개면 그 영역을 숨긴다.
+  - `/`: 홈. 맨 위 한 줄 소개(프로필의 `intro`. 이름은 헤더에 있으므로 반복하지 않는다. 대신 화면에 보이지 않는 `h1`로 활동명을 둔다(7단계)), 그 아래 최근 포트폴리오 3개와 최근 글 3개. 영역마다 전체 목록(`/portfolio/`, `/blog/`) 링크를 둔다. 항목이 3개보다 적으면 있는 만큼, 0개면 그 영역을 숨긴다.
     - "최근 포트폴리오"는 `portfolio.yaml`의 앞에서부터 3개다(날짜 필드가 없으므로, 새 항목을 파일 맨 위에 적는다).
   - `/portfolio/`: 포트폴리오. 모든 항목을 카드로 보여 준다(파일에 적은 순서).
     - 항목이 0개(빈 배열 `[]`)면 제목 아래에 "아직 항목이 없습니다."를 흐린 글자색으로 보여 준다(`EmptyNotice` 컴포넌트, 글 목록도 같이 쓴다). 메뉴로 들어온 방문자에게 빈 화면이 고장 난 것처럼 보이지 않게 하기 위해서다.
@@ -45,11 +47,25 @@
 ## 내비게이션과 공통 레이아웃 구성
 
 - 모든 페이지가 공통 레이아웃 하나(`BaseLayout`)를 쓴다. 문서 머리(`<head>`), 헤더, 본문, 푸터를 담는다.
-- 사이트 이름: 프로필의 `name`을 쓴다(헤더, 푸터의 저작권 표시, 7단계의 페이지 제목). 같은 값을 코드와 데이터 파일 두 곳에 두지 않기 위해서다.
+- 사이트 이름: 프로필의 `name`을 쓴다(헤더, 푸터의 저작권 표시, 페이지 제목). 같은 값을 코드와 데이터 파일 두 곳에 두지 않기 위해서다.
 - 헤더: 사이트 이름(`/` 링크)과 메뉴 "포트폴리오"(`/portfolio/`), "블로그"(`/blog/`), "소개"(`/about/`). 현재 위치의 메뉴를 표시한다(글 보기 페이지에서는 "블로그", 홈에서는 표시 없음).
 - 포트폴리오 카드와 글 목록 항목은 홈과 전체 목록 페이지가 같이 쓰므로 공통 컴포넌트로 만든다. 홈의 영역(제목과 "전체 보기" 링크, `HomeSection`)도 최근 포트폴리오와 최근 글이 같이 쓴다.
 - 푸터: 저작권 표시, 이메일, 프로필 `links` 전체. 값은 프로필 데이터 파일에서 가져온다.
 - 색·글꼴·간격 등 시각적 값과 각 부분의 모양은 아래 [공통 UI](#공통-ui)에 있다.
+
+### 메타 태그
+
+7단계에서 정했다. 선택지 비교와 이유는 [7단계 문서](stages/7-seo.md#하위-단계-1-메타-태그)에 있다. `BaseLayout`이 넣고, 페이지는 값만 넘긴다(`src/lib/seo.ts`는 OG 이미지 정보와 구조화 데이터를 만든다).
+
+- 제목: `<제목> - <활동명>`, 홈은 `<활동명>`. `og:title`은 뒤의 활동명을 뺀 페이지 제목(홈은 활동명)이고, 활동명은 `og:site_name`으로 알린다.
+- 설명(`description`): 페이지마다 필수로 넘긴다. 글은 글의 `description`, 홈·소개는 프로필의 `intro`, 포트폴리오·블로그 목록은 페이지 코드의 고정 문구(활동명은 프로필 값으로 넣는다). 새 페이지를 만들면 그 페이지의 설명을 정해 넘긴다.
+- 페이지 종류별 태그:
+  - 404를 뺀 모든 페이지: `description`, canonical, `og:type`(글은 `article`, 나머지는 `website`), `og:title`, `og:description`, `og:url`(canonical과 같은 값), `og:site_name`, `og:locale`(`ko_KR`), `og:image`와 크기·대체 텍스트, `twitter:card`(`summary_large_image`)
+  - 글 보기: 위에 더해 `article:published_time`, `article:modified_time`(`updated`가 있을 때만), 구조화 데이터(JSON-LD `BlogPosting`의 `datePublished`, `dateModified`). 날짜는 `YYYY-MM-DD`.
+  - 404: 설명·canonical·OG·Twitter 태그와 구조화 데이터를 넣지 않는다(`notFound`). 없는 모든 주소에 같은 내용으로 나가 대표 주소가 없기 때문이다.
+  - 모든 페이지: 제목, 파비콘, 공개 전 noindex([기술 스택](#기술-스택)의 공개 전 수집 차단).
+- 주소: canonical, `og:url`, `og:image`는 사이트 주소(`SITE`) 기준 절대 주소다. 8단계에서 `SITE`를 바꾸면 따라 바뀐다.
+- 이미지: OG 이미지(`public/og.png`, 1200×630, 모든 페이지 공통)와 파비콘(`public/favicon.svg`, `favicon-96.png`, `apple-touch-icon.png`). 원본은 `docs/stages/7-seo/`에 있고 `sh docs/stages/7-seo/make-images.sh`로 만든다. OG 이미지에는 활동명과 한 줄 소개가 글자로 들어 있으므로, 프로필의 두 값을 바꾸면 원본도 고쳐 다시 만든다(원본 수정을 빼먹으면 빌드 결과 검사가 실패한다. 원본만 고치고 이미지를 다시 만들지 않은 것은 검사가 잡지 못한다). 이 변경은 콘텐츠만 바꾸는 커밋이 아니므로 작업용 브랜치에서 한다.
 
 ## 데이터 파일 형식
 
@@ -123,11 +139,12 @@ Astro 기본 구조를 따른다. `src/` 아래에 이 목록에 없는 폴더�
 
 - `.github/workflows/`: 검증·빌드·배포 워크플로(`deploy.yml`)
 - `.github/actions/`: 워크플로의 작업들이 같이 쓰는 단계(`setup/`: pnpm·Node·의존성 설치)
-- `public/`: 가공 없이 그대로 복사할 파일(파비콘 등)
+- `public/`: 가공 없이 그대로 복사할 파일(파비콘, OG 이미지)
+- `scripts/`: 빌드 과정에서 Node로 실행하는 스크립트(`check-build.ts`: 빌드 결과 검사)
 - `src/pages/`: 페이지. 파일 위치가 곧 URL이다(`index.astro`, `portfolio/index.astro`, `about/index.astro`, `blog/index.astro`, `blog/[slug].astro`, `404.astro`). `robots.txt.ts`는 robots.txt를 만든다.
 - `src/layouts/`: 공통 레이아웃(`BaseLayout.astro`)
 - `src/components/`: 여러 곳에서 쓰는 UI 부품
-- `src/lib/`: 여러 페이지가 쓰는 로직(글 목록 정렬, 날짜 표시, 데이터 가져오기, 콘텐츠 로더, 사이트 설정 값 등)
+- `src/lib/`: 여러 페이지가 쓰는 로직(글 목록 정렬, 날짜 표시, 데이터 가져오기, 콘텐츠 로더, 사이트 설정 값, 메타 태그 값 등)
 - `src/content/blog/`: 블로그 글 md(`<slug>.md`). `images/<slug>/`: 글에 넣는 이미지
 - `src/data/`: 프로필·포트폴리오 데이터 파일
 - `src/styles/global.css`: Tailwind 불러오기, 테마(`@theme`), 이름 붙인 유틸리티(`@utility`)
@@ -155,12 +172,17 @@ lint·포맷터가 자동으로 잡는 것은 적지 않는다.
 ## 테스트 전략
 
 - 빌드 시점 검증(필수): 다음이 모두 통과해야 배포한다. 로컬에서도 같은 명령으로 확인한다.
-  - 명령: `pnpm check`(타입 검사, lint, 포맷 검사), `pnpm build`(빌드), `pnpm verify`(둘을 차례로. 로컬에서 머지 전에 실행한다). 구성 이유는 [4단계 문서](stages/4-foundation.md#검증-명령)에 있다.
+  - 명령: `pnpm check`(타입 검사, lint, 포맷 검사), `pnpm build`(빌드와 빌드 결과 검사), `pnpm verify`(둘을 차례로. 로컬에서 머지 전에 실행한다). 구성 이유는 [4단계 문서](stages/4-foundation.md#검증-명령)에 있다.
   - 타입 검사: `astro check`
   - lint: ESLint
   - 포맷 검사: Prettier `--check`. 글(`src/content/blog/`)과 데이터 파일(`src/data/`)은 검사에서 뺀다(`.prettierignore`). 직접 쓴 글의 형식이 포맷 규칙과 조금 달라도 배포가 막히지 않게 하기 위해서다. 이 파일들의 형식은 스키마 검증이 맡는다. `docs/`와 `CLAUDE.md`도 배포되는 파일이 아니므로 검사에서 뺀다.
   - 데이터 형식: `astro build`(콘텐츠 컬렉션 스키마 검증 포함)
-- 빌드 결과 검사: 7단계에서 메타 태그·sitemap 누락을 확인하는 스크립트를 추가하고, 빌드 시점 검증에 포함한다.
+- 빌드 결과 검사: `scripts/check-build.ts`가 `astro build` 뒤에 `dist/`를 읽어 확인한다(`pnpm build`에 포함되어 CI의 빌드 작업에서도 실행되고, 실패하면 배포되지 않는다). 동작과 이유는 [7단계 문서](stages/7-seo.md#하위-단계-2-sitemaprobotstxt와-빌드-결과-검사)에 있다.
+  - 모든 페이지: 제목, 파비콘(파일이 있는지 포함), noindex가 `ALLOW_INDEXING`과 맞는지, 같은 태그가 두 번 들어가지 않았는지
+  - 메타 태그: [메타 태그](#메타-태그)의 페이지 종류별 규칙(있어야 할 태그, 정해진 값(`og:locale`, `twitter:card`, `og:site_name`, `og:description`=`description`, 주소), 404에 없어야 할 태그). 글 보기는 글 파일(`src/content/blog/<slug>.md`)이 있는 `/blog/<slug>/` 페이지이고, 글마다 페이지가 있는지도 본다.
+  - sitemap에 404를 뺀 모든 페이지가 있고 그 밖의 주소가 없는지, robots.txt의 규칙(반대 규칙이 없는지 포함)과 sitemap 주소
+  - OG 이미지 원본의 활동명·한 줄 소개(`data-profile`)가 프로필 데이터와 같은지
+  - 새 페이지를 만들면 메타 태그 규칙만 지키면 되고 검사를 고칠 필요는 없다. 메타 태그 규칙을 바꾸면 검사도 함께 고친다.
 - 사람 검토: 단계마다 로컬 빌드 미리보기(`astro build` 뒤 `astro preview`)로 화면을 확인한다.
 - 하지 않는 것: 단위 테스트, 화면 비교 테스트, E2E. `src/lib/`의 로직이 화면만 보고 확인하기 어려울 만큼 복잡해지면 그 부분에 단위 테스트(Vitest)를 추가한다.
 

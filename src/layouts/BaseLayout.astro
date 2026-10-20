@@ -5,16 +5,49 @@ import '@fontsource/jetbrains-mono/latin-700.css';
 import '../styles/global.css';
 import Container from '../components/Container.astro';
 import { getProfile } from '../lib/profile';
-import { ALLOW_INDEXING } from '../lib/site';
+import { ALLOW_INDEXING, siteUrl } from '../lib/site';
+import { OG_IMAGE, blogPostingJsonLd, type ArticleDates } from '../lib/seo';
+import { formatDate } from '../lib/format-date';
 
-interface Props {
-  // 페이지 제목. 없으면 사이트 이름만 쓴다(제목 형식의 세부는 7단계에서 정한다).
-  title?: string;
-}
+// 메타 태그 규칙은 docs/design.md의 "메타 태그"를 따른다.
+// 일반 페이지는 설명이 필수이고, 글 보기는 날짜(article)를 더 넘긴다.
+// 404는 notFound로 표시하며 설명·canonical·OG 태그를 넣지 않는다.
+type Props =
+  | {
+      // 페이지 제목. 없으면(홈) 사이트 이름만 쓴다.
+      title?: string;
+      description: string;
+      article?: ArticleDates;
+      notFound?: false;
+    }
+  | { title: string; notFound: true };
 
-const { title } = Astro.props;
+const props = Astro.props;
+const { title } = props;
 const profile = await getProfile();
 const pageTitle = title ? `${title} - ${profile.name}` : profile.name;
+
+const ogImage = siteUrl(OG_IMAGE.path);
+const ogImageAlt = `${profile.name} - ${profile.intro}`;
+// 주소를 대표하는 태그. 404는 없는 모든 주소에 같은 내용으로 나가므로 넣지 않는다.
+const meta = props.notFound
+  ? undefined
+  : {
+      description: props.description,
+      canonical: siteUrl(Astro.url.pathname),
+      ogTitle: title ?? profile.name,
+      article: props.article,
+    };
+const jsonLd =
+  meta?.article &&
+  blogPostingJsonLd({
+    url: meta.canonical,
+    title: meta.ogTitle,
+    description: meta.description,
+    dates: meta.article,
+    image: ogImage,
+    author: { name: profile.name, url: siteUrl('/about/') },
+  });
 
 const menu = [
   { href: '/portfolio/', label: '포트폴리오' },
@@ -38,6 +71,46 @@ const year = new Date().getFullYear();
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {!ALLOW_INDEXING && <meta name="robots" content="noindex, nofollow" />}
     <title>{pageTitle}</title>
+    <link rel="icon" href="/favicon-96.png" sizes="96x96" type="image/png" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    {
+      meta && (
+        <>
+          <meta name="description" content={meta.description} />
+          <link rel="canonical" href={meta.canonical} />
+          <meta
+            property="og:type"
+            content={meta.article ? 'article' : 'website'}
+          />
+          <meta property="og:title" content={meta.ogTitle} />
+          <meta property="og:description" content={meta.description} />
+          <meta property="og:url" content={meta.canonical} />
+          <meta property="og:site_name" content={profile.name} />
+          <meta property="og:locale" content="ko_KR" />
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:image:width" content={String(OG_IMAGE.width)} />
+          <meta property="og:image:height" content={String(OG_IMAGE.height)} />
+          <meta property="og:image:alt" content={ogImageAlt} />
+          <meta name="twitter:card" content="summary_large_image" />
+          {meta.article && (
+            <meta
+              property="article:published_time"
+              content={formatDate(meta.article.published)}
+            />
+          )}
+          {meta.article?.modified && (
+            <meta
+              property="article:modified_time"
+              content={formatDate(meta.article.modified)}
+            />
+          )}
+          {jsonLd && (
+            <script is:inline type="application/ld+json" set:html={jsonLd} />
+          )}
+        </>
+      )
+    }
   </head>
   <body
     class="flex min-h-dvh flex-col bg-bg font-sans text-base leading-normal wrap-anywhere break-keep text-text"

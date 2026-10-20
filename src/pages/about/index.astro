@@ -7,7 +7,7 @@ import { getProfile } from '../../lib/profile';
 const profile = await getProfile();
 ---
 
-<BaseLayout title="소개">
+<BaseLayout title="소개" description={profile.intro}>
   <PageTitle>{profile.name}</PageTitle>
   <p class="-mt-6 mb-10 text-muted">{profile.intro}</p>
   <dl class="grid grid-cols-label gap-x-6 gap-y-3 text-sm">

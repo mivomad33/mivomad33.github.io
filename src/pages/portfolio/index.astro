@@ -4,12 +4,17 @@ import EmptyNotice from '../../components/EmptyNotice.astro';
 import PageTitle from '../../components/PageTitle.astro';
 import PortfolioList from '../../components/PortfolioList.astro';
 import { getPortfolio } from '../../lib/portfolio';
+import { getProfile } from '../../lib/profile';
 
 // 포트폴리오. 모든 항목을 파일에 적은 순서대로 카드로 보여 준다.
 const portfolio = await getPortfolio();
+const profile = await getProfile();
 ---
 
-<BaseLayout title="포트폴리오">
+<BaseLayout
+  title="포트폴리오"
+  description={`${profile.name}의 포트폴리오. 만든 것과 참여한 프로젝트.`}
+>
   <PageTitle>포트폴리오</PageTitle>
   {
     portfolio.length > 0 ? (

@@ -4,12 +4,17 @@ import EmptyNotice from '../../components/EmptyNotice.astro';
 import PageTitle from '../../components/PageTitle.astro';
 import PostList from '../../components/PostList.astro';
 import { getPosts } from '../../lib/blog';
+import { getProfile } from '../../lib/profile';
 
 // 글 목록. 모든 글을 게시일 최신순으로 한 페이지에 보여 준다.
 const posts = await getPosts();
+const profile = await getProfile();
 ---
 
-<BaseLayout title="블로그">
+<BaseLayout
+  title="블로그"
+  description={`${profile.name}의 개발과 사업 활동 기록.`}
+>
   <PageTitle>블로그</PageTitle>
   {
     posts.length > 0 ? (

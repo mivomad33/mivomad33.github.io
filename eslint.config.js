@@ -11,7 +11,7 @@ export default defineConfig(
   tseslint.configs.recommended,
   astro.configs.recommended,
   {
-    // Node에서 실행되는 설정 파일에만 Node 전역 변수를 허용한다.
+    // Node에서 실행되는 설정 파일에 Node 전역 변수를 허용한다(scripts/의 TS 파일은 typescript-eslint가 no-undef를 꺼 따로 적지 않는다).
     files: ['*.config.{js,mjs,ts}'],
     languageOptions: {
       globals: { ...globals.node },
