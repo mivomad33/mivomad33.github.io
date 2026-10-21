@@ -1,0 +1,219 @@
+<!doctype html>
+<!-- 변경 4(프로필 이미지를 원형 아이보리 배경으로) 시안. 브라우저로 열고 맨 위 도구 막대로 이미지·크기·언어·화면을 바꾼다.
+     사이트 스타일과 C안 배치는 변경 3 시안(docs/changes/3-profile-image/index.html)에서 옮겼다.
+     글꼴은 사이트와 같은 npm 패키지 파일을 node_modules에서 읽는다(pnpm install 뒤에 연다). -->
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>변경 4 시안: 원형 프로필 이미지</title>
+    <link rel="stylesheet" href="../../../node_modules/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+    <link rel="stylesheet" href="../../../node_modules/@fontsource/jetbrains-mono/latin-400.css" />
+    <link rel="stylesheet" href="../../../node_modules/@fontsource/jetbrains-mono/latin-700.css" />
+    <style>
+      /* 디자인 값(design.md 공통 UI). 아래 스타일은 이 변수만 쓴다. */
+      :root {
+        --color-bg: #fcfcfc;
+        --color-surface: #f3f4f6;
+        --color-text: #1f2328;
+        --color-muted: #656d76;
+        --color-border: #d0d7de;
+        --color-accent: #1a7f37;
+        --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+          'Noto Sans KR', sans-serif;
+        --font-mono: 'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, Menlo, monospace;
+        --text-xs: 0.75rem;
+        --text-sm: 0.8125rem;
+        --text-base: 0.9375rem;
+        --text-lg: 1.0625rem;
+        --text-xl: 1.25rem;
+        --text-2xl: 1.625rem;
+        --leading-tight: 1.4;
+        --leading-normal: 1.65;
+        --font-weight-bold: 700;
+        --spacing: 0.25rem;
+        --container-content: 46rem;
+        --radius-sm: 0.25rem;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-sans);
+        font-size: var(--text-base);
+        line-height: var(--leading-normal);
+        word-break: keep-all;
+        overflow-wrap: anywhere;
+      }
+      a { color: inherit; text-decoration: none; }
+      ul { list-style: none; margin: 0; padding: 0; }
+      h1, p, dl, dd { margin: 0; }
+      img { display: block; }
+      .wrap { max-width: var(--container-content); margin-inline: auto; padding-inline: calc(var(--spacing) * 5); }
+
+      /* ---- 시안 도구 막대(사이트에 들어가지 않는다) ---- */
+      .toolbar {
+        position: sticky; top: 0; z-index: 10;
+        display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+        padding: 8px 12px; background: #24292f; color: #fff; font: 12px/1.4 -apple-system, sans-serif;
+      }
+      .toolbar fieldset { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; border: 0; margin: 0; padding: 0; }
+      .toolbar legend { float: left; margin-right: 6px; color: #9da7b3; }
+      .toolbar button { border: 1px solid #57606a; background: transparent; color: #fff; border-radius: 4px; padding: 2px 8px; font: inherit; cursor: pointer; }
+      .toolbar button[aria-pressed='true'] { background: #fff; color: #24292f; }
+      .toolbar button:disabled { opacity: 0.4; cursor: default; }
+      .note {
+        margin-block: calc(var(--spacing) * 6) 0; padding: 10px 12px; border: 1px dashed #bf8700; background: #fff8c5;
+        font: 12px/1.6 -apple-system, sans-serif; color: #3b2300;
+      }
+      .note ul { list-style: disc; padding-left: 18px; }
+
+      /* ---- 사이트 스타일(변경 2 시안과 같다) ---- */
+      .site-header { border-bottom: 1px dashed var(--color-border); font-family: var(--font-mono); }
+      .site-header-inner {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: calc(var(--spacing) * 2) calc(var(--spacing) * 6); padding-block: calc(var(--spacing) * 5);
+      }
+      .site-name { font-weight: var(--font-weight-bold); }
+      .site-name::before { content: '~/'; color: var(--color-accent); }
+      .header-right { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--spacing) * 2) calc(var(--spacing) * 4); }
+      .menu { display: flex; gap: calc(var(--spacing) * 3); font-family: var(--font-sans); font-size: var(--text-sm); }
+      .menu a { color: var(--color-muted); }
+      .menu a::before, .menu a::after { font-family: var(--font-mono); color: transparent; }
+      .menu a::before { content: '['; }
+      .menu a::after { content: ']'; }
+      .menu a.current { color: var(--color-accent); font-weight: var(--font-weight-bold); }
+      .menu a.current::before, .menu a.current::after { color: inherit; }
+      .lang-switch { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--color-muted); }
+      .lang-switch b { color: var(--color-accent); }
+      .site-main { padding-block: calc(var(--spacing) * 12) calc(var(--spacing) * 16); }
+      .site-footer { border-top: 1px dashed var(--color-border); color: var(--color-muted); font-family: var(--font-mono); font-size: var(--text-sm); }
+      .site-footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: calc(var(--spacing) * 3); padding-block: calc(var(--spacing) * 8); }
+      .footer-links { display: flex; flex-wrap: wrap; gap: calc(var(--spacing) * 4); font-family: var(--font-sans); }
+
+      /* 소개 페이지(지금 사이트와 같다): 페이지 제목 mb-10, 한 줄 소개 -mt-6 mb-10 */
+      .page-title { font-size: var(--text-2xl); line-height: var(--leading-tight); font-weight: var(--font-weight-bold); margin-bottom: calc(var(--spacing) * 10); }
+      .page-title .hash { font-family: var(--font-mono); color: var(--color-accent); }
+      .intro { margin-top: calc(var(--spacing) * -6); margin-bottom: calc(var(--spacing) * 10); color: var(--color-muted); }
+      .about-info { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: calc(var(--spacing) * 3) calc(var(--spacing) * 6); font-size: var(--text-sm); }
+      .about-info dt { color: var(--color-muted); }
+      .about-info a { color: var(--color-accent); }
+      .about-info a:hover { text-decoration: underline; }
+      .about-links { display: flex; flex-wrap: wrap; gap: calc(var(--spacing) * 4); }
+
+      /* ---- 프로필 이미지(변경 3: 64px, C안 배치) ---- */
+      /* 크기. 원본은 512px 칸에 24px 칸 단위로 그린 픽셀 그림이라, 64px이면 칸 하나가 3px, 128px이면 6px이다. */
+      .avatar { width: var(--avatar-size); height: var(--avatar-size); flex: none; }
+      [data-size='64'] { --avatar-size: 64px; }
+      [data-size='128'] { --avatar-size: 128px; }
+      /* C안: 소개 내용 전체(제목~링크) 오른쪽에 이미지. 좁은 화면(40rem 미만)에서는 제목 위로 올린다. */
+      .profile-body { display: flex; flex-direction: column-reverse; gap: calc(var(--spacing) * 6); }
+      .profile-text { flex: 1; min-width: 0; }
+      @media (min-width: 40rem) {
+        .profile-body { flex-direction: row; align-items: flex-start; }
+      }
+
+      /* ---- 이 변경에서 새로 생기는 부분: 원형 ---- */
+      /* 원본(아이보리 배경 #FCF6EC가 있는 정사각형)을 원으로 오려 낸다. 테두리는 없다.
+         캐릭터는 원 안에 모두 들어간다(가장 바깥인 날개 끝도 중심에서 반지름의 약 88%). */
+      .avatar.round { border-radius: 9999px; }
+
+      /* 비교 화면: 두 이미지를 한 번에 */
+      .compare { display: grid; gap: calc(var(--spacing) * 12); }
+      .compare-item { border-top: 1px dashed var(--color-border); padding-top: calc(var(--spacing) * 6); }
+      .compare-label { font: 12px/1.4 -apple-system, sans-serif; color: #9a6700; margin-bottom: calc(var(--spacing) * 6); }
+      .compare-label b { color: #3b2300; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // 시안 상태. 도구 막대가 바꾼다.
+      const state = { image: 'round', size: '64', lang: 'ko', view: 'one' };
+
+      const IMAGES = {
+        now: { ko: '지금: 배경을 뺀 투명 이미지(변경 3)', en: 'Now: transparent image without background (change 3)', src: 'profile-transparent.svg', round: false },
+        round: { ko: '바꿀 안: 아이보리 배경 원본을 원형으로(테두리 없음)', en: 'New: original with ivory background, cropped to a circle (no border)', src: 'profile.svg', round: true },
+      };
+
+      // 화면 문구. ko·en 짝으로 둔다. 활동명·소개·이메일·링크는 src/data/profile.yaml과 같다.
+      const T = {
+        menu: { ko: ['포트폴리오', '블로그', '소개'], en: ['Portfolio', 'Blog', 'About'] },
+        intro: { ko: '1인 사업가를 꿈꾸는 개발자', en: 'A developer who dreams of becoming a solo entrepreneur' },
+        email: { ko: '이메일:', en: 'Email:' },
+        links: { ko: '링크:', en: 'Links:' },
+      };
+      const t = (key) => T[key][state.lang];
+
+      // 이미지는 바로 옆에 활동명이 있으므로 꾸밈 이미지로 둔다(alt="").
+      const avatar = (key) => `<img class="avatar${IMAGES[key].round ? ' round' : ''}" src="${IMAGES[key].src}" alt="" width="${state.size}" height="${state.size}" />`;
+      const title = () => `<h1 class="page-title"><span class="hash" aria-hidden="true"># </span>mivomad33</h1>`;
+      const intro = () => `<p class="intro">${t('intro')}</p>`;
+      const info = () =>
+        `<dl class="about-info"><dt>${t('email')}</dt><dd><a href="mailto:mivomad33@gmail.com">mivomad33@gmail.com</a></dd>
+          <dt>${t('links')}</dt><dd><ul class="about-links"><li><a href="https://github.com/mivomad33" target="_blank" rel="noopener">GitHub</a></li></ul></dd></dl>`;
+
+      function about(key) {
+        return `<div class="profile-body"><div class="profile-text">${title()}${intro()}${info()}</div>${avatar(key)}</div>`;
+      }
+
+      function header() {
+        const menu = t('menu').map((m, i) => `<a href="#"${i === 2 ? ' class="current"' : ''}>${m}</a>`).join('');
+        const sw = state.lang === 'ko' ? '<b>ko</b>/en' : 'ko/<b>en</b>';
+        return `<header class="site-header"><div class="wrap site-header-inner"><a class="site-name" href="#">mivomad33</a>
+          <div class="header-right"><nav class="menu">${menu}</nav><span class="lang-switch">${sw}</span></div></div></header>`;
+      }
+
+      function footer() {
+        return `<footer class="site-footer"><div class="wrap site-footer-inner"><p>© 2026 mivomad33</p><ul class="footer-links">
+          <li><a href="mailto:mivomad33@gmail.com">mivomad33@gmail.com</a></li><li><a href="https://github.com/mivomad33">GitHub</a></li></ul></div></footer>`;
+      }
+
+      function note() {
+        return `<div class="note"><b>보는 법</b><ul>
+          <li>"바꿀 안"은 원본 SVG(아이보리 배경)를 그대로 쓰고 원형으로 오려 낸다. 테두리는 없다.</li>
+          <li>"두 이미지 비교"로 지금 사이트(투명 이미지)와 나란히 볼 수 있다. 배치는 지금 사이트와 같다(C안).</li>
+          <li>모바일 확인: 브라우저 폭을 375px로 줄이면 이미지가 제목 위로 올라간다.</li></ul></div>`;
+      }
+
+      function body() {
+        if (state.view === 'one') return about(state.image);
+        return `<div class="compare">${Object.keys(IMAGES)
+          .map((key) => `<div class="compare-item"><p class="compare-label"><b>${IMAGES[key][state.lang]}</b></p>${about(key)}</div>`)
+          .join('')}</div>`;
+      }
+
+      function toolbar() {
+        const group = (legend, key, choices) =>
+          `<fieldset><legend>${legend}</legend>${choices
+            .map(([value, label]) => `<button type="button" data-key="${key}" data-value="${value}" aria-pressed="${state[key] === value}">${label}</button>`)
+            .join('')}</fieldset>`;
+        return `<div class="toolbar">${group('화면', 'view', [['one', '한 안'], ['compare', '두 이미지 비교']])}${group('이미지', 'image', [['round', '원형 아이보리'], ['now', '지금(투명)']])}${group('크기', 'size', [['64', '64px'], ['128', '128px']])}${group('언어', 'lang', [['ko', '한국어'], ['en', 'English']])}</div>`;
+      }
+
+      function render() {
+        document.documentElement.lang = state.lang;
+        const app = document.getElementById('app');
+        app.dataset.size = state.size;
+        app.innerHTML = `${toolbar()}<div class="wrap">${note()}</div>${header()}<main class="site-main"><div class="wrap">${body()}</div></main>${footer()}`;
+        // 이미지 버튼은 비교 화면에서 쓸모가 없으므로 흐리게 둔다.
+        app.querySelectorAll('[data-key="image"]').forEach((b) => (b.disabled = state.view === 'compare'));
+      }
+
+      document.addEventListener('click', (e) => {
+        const button = e.target.closest('.toolbar button');
+        if (button) {
+          state[button.dataset.key] = button.dataset.value;
+          render();
+          return;
+        }
+        // 시안 안의 사이트 안 링크는 이동하지 않게 막는다.
+        const a = e.target.closest('a');
+        if (a && !a.target) e.preventDefault();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

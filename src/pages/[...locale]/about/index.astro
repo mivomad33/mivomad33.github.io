@@ -9,6 +9,7 @@ import { localeStaticPaths, UI, type Locale } from '../../../lib/i18n';
 // 소개(언어마다 하나). 활동명, 한 줄 소개, 이메일, 링크. 링크가 없으면 링크 줄을 숨긴다.
 // 프로필 이미지는 넓은 화면에서 내용 오른쪽, 좁은 화면에서 제목 위에 둔다(변경 3).
 // 칸 단위 픽셀 그림이라 64px(칸 하나 3px)로 보여 칸 폭이 고르게 한다. 옆에 활동명이 있으므로 꾸밈 이미지(alt="")다.
+// 아이보리 배경이 있는 정사각형 원본을 원형으로 오려 보여 준다(변경 4, 테두리 없음).
 export function getStaticPaths() {
   return localeStaticPaths();
 }
@@ -62,7 +63,7 @@ const profile = await getProfile(locale);
       alt=""
       width="64"
       height="64"
-      class="size-16 shrink-0"
+      class="size-16 shrink-0 rounded-full"
     />
   </div>
 </BaseLayout>
