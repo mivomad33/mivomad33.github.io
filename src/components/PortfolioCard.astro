@@ -1,4 +1,5 @@
 ---
+import Link from './Link.astro';
 import type { PortfolioItem } from '../lib/portfolio';
 
 // 포트폴리오 카드. 포트폴리오 페이지와 홈의 최근 포트폴리오가 같이 쓴다.
@@ -22,12 +23,12 @@ const Heading = `h${headingLevel}` as const;
       <ul class="flex flex-wrap gap-4 text-sm">
         {item.links.map(({ label, url }) => (
           <li>
-            <a href={url} class="text-accent hover:underline">
+            <Link href={url} class="text-accent hover:underline">
               <span class="font-mono" aria-hidden="true">
                 →{' '}
               </span>
               {label}
-            </a>
+            </Link>
           </li>
         ))}
       </ul>

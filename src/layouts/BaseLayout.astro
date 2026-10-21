@@ -4,6 +4,7 @@ import '@fontsource/jetbrains-mono/latin-400.css';
 import '@fontsource/jetbrains-mono/latin-700.css';
 import '../styles/global.css';
 import Container from '../components/Container.astro';
+import Link from '../components/Link.astro';
 import { getProfile } from '../lib/profile';
 import { ALLOW_INDEXING, siteUrl } from '../lib/site';
 import { OG_IMAGE, blogPostingJsonLd, type ArticleDates } from '../lib/seo';
@@ -251,9 +252,9 @@ const year = new Date().getFullYear();
           {
             footerLinks.map(({ label, url }) => (
               <li>
-                <a href={url} class="hover:text-accent">
+                <Link href={url} class="hover:text-accent">
                   {label}
-                </a>
+                </Link>
               </li>
             ))
           }

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageTitle from '../../../components/PageTitle.astro';
+import Link from '../../../components/Link.astro';
 import { getProfile } from '../../../lib/profile';
 import { localeStaticPaths, UI, type Locale } from '../../../lib/i18n';
 
@@ -36,9 +37,9 @@ const profile = await getProfile(locale);
             <ul class="flex flex-wrap gap-4">
               {profile.links.map(({ label, url }) => (
                 <li>
-                  <a href={url} class="text-accent hover:underline">
+                  <Link href={url} class="text-accent hover:underline">
                     {label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

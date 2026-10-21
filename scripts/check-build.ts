@@ -18,6 +18,14 @@ import {
   pathWithoutLocale,
   type Locale,
 } from '../src/lib/i18n.ts';
+import {
+  EXTERNAL_ICON_CLASS,
+  EXTERNAL_LABEL_CLASS,
+  EXTERNAL_LINK_ATTRS,
+  WORD_JOINER,
+  isExternalUrl,
+  newTabLabel,
+} from '../src/lib/link.ts';
 
 const DIST = 'dist';
 const BLOG = 'src/content/blog';
@@ -169,6 +177,7 @@ function checkPage(
         ? 'ALLOW_INDEXING이 true인데 noindex가 있습니다.'
         : 'ALLOW_INDEXING이 false인데 noindex가 없습니다.',
     );
+  checkLinks(where, body, lang);
 
   // 404: 주소를 대표하는 태그를 넣지 않는다.
   if (file === join(DIST, '404.html')) {
@@ -275,6 +284,43 @@ function checkPage(
       fail(where, '글이 아닌 페이지에 구조화 데이터가 있습니다.');
   }
   return url;
+}
+
+// 외부 링크(변경 2): 외부 링크는 새 탭 속성과, 링크 컴포넌트·md 플러그인이 만드는 마크업(링크 글자 span, 아이콘,
+// 페이지 언어의 문구를 화면 낭독기 이름으로 가진 아이콘)을 그대로 갖고, 외부가 아닌 링크에는 target이 없다.
+// 판단은 컴포넌트·플러그인과 같은 함수(src/lib/link.ts)로 한다. 둘을 거치지 않은 <a>(직접 쓴 <a>, md에 HTML로 쓴 <a>)를 잡는다.
+function checkLinks(where: string, body: string, lang: string | undefined) {
+  const locale = LOCALES.find((code) => code === lang);
+  for (const match of body.matchAll(tagPattern('a'))) {
+    const [tag] = match;
+    const attrs = attributes(tag);
+    const href = attrs.href ?? '';
+    if (!isExternalUrl(href)) {
+      if (attrs.target !== undefined)
+        fail(where, `외부가 아닌 링크에 target이 있습니다: ${href}`);
+      continue;
+    }
+    const start = match.index + tag.length;
+    const content = body.slice(start, body.indexOf('</a>', start));
+    const problems = [];
+    if (attrs.target !== EXTERNAL_LINK_ATTRS.target)
+      problems.push(`target이 ${EXTERNAL_LINK_ATTRS.target}가 아니다`);
+    if (attrs.rel !== EXTERNAL_LINK_ATTRS.rel)
+      problems.push(`rel이 ${EXTERNAL_LINK_ATTRS.rel}가 아니다`);
+    if (!content.startsWith(`<span class="${EXTERNAL_LABEL_CLASS}">`))
+      problems.push('링크 글자 span이 없다');
+    if (
+      !content.endsWith(
+        `${WORD_JOINER}<span class="${EXTERNAL_ICON_CLASS}" role="img" aria-label="${locale ? newTabLabel(locale) : ''}"></span>`,
+      )
+    )
+      problems.push(`아이콘이 없거나 아이콘 이름이 ${lang}의 문구가 아니다`);
+    if (problems.length > 0)
+      fail(
+        where,
+        `외부 링크가 링크 컴포넌트(Link.astro)나 md 플러그인의 모양이 아닙니다(${problems.join(', ')}): ${href}`,
+      );
+  }
 }
 
 // 언어별 버전 링크(HTML의 hreflang 링크, sitemap의 xhtml:link)가 정한 것과 같은지.

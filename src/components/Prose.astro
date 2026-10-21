@@ -50,6 +50,14 @@
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
+  /* 외부 링크(변경 2): 밑줄을 링크 글자에만 긋는다. 링크 전체에 그으면 뒤의 아이콘까지 이어진다. */
+  .prose :global(a[target='_blank']) {
+    text-decoration: none;
+  }
+  .prose :global(.external-label) {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
   .prose :global(blockquote) {
     padding-left: calc(var(--spacing) * 4);
     border-left: 2px solid var(--color-accent);

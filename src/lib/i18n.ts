@@ -81,6 +81,8 @@ const ko = {
   blogDescription: (name: string) => `${name}의 개발과 사업 활동 기록.`,
   notFound: '페이지를 찾을 수 없습니다',
   goHome: '홈으로 가기',
+  // 외부 링크 아이콘이 화면 낭독기에 읽히는 이름(변경 2)
+  newTab: '(새 탭에서 열림)',
 };
 
 const en: typeof ko = {
@@ -103,6 +105,7 @@ const en: typeof ko = {
     `Notes by ${name} on software development and building a business.`,
   notFound: 'Page not found',
   goHome: 'Go to home',
+  newTab: '(opens in a new tab)',
 };
 
 export const UI: Record<Locale, typeof ko> = { ko, en };

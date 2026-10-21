@@ -1,0 +1,324 @@
+<!doctype html>
+<!-- 변경 2(외부 링크를 새 탭으로) 시안. 브라우저로 열고 맨 위 도구 막대로 표시 안·카드 링크 처리·언어·화면을 바꾼다.
+     사이트 스타일은 변경 1 시안(docs/changes/1-english-version/mockup.css)에서 링크가 나오는 부분만 옮겼다.
+     글꼴은 사이트와 같은 npm 패키지 파일을 node_modules에서 읽는다(pnpm install 뒤에 연다). -->
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>변경 2 시안: 외부 링크 표시</title>
+    <link rel="stylesheet" href="../../../node_modules/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+    <link rel="stylesheet" href="../../../node_modules/@fontsource/jetbrains-mono/latin-400.css" />
+    <link rel="stylesheet" href="../../../node_modules/@fontsource/jetbrains-mono/latin-700.css" />
+    <style>
+      /* 디자인 값(design.md 공통 UI). 아래 스타일은 이 변수만 쓴다. */
+      :root {
+        --color-bg: #fcfcfc;
+        --color-surface: #f3f4f6;
+        --color-text: #1f2328;
+        --color-muted: #656d76;
+        --color-border: #d0d7de;
+        --color-accent: #1a7f37;
+        --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+          'Noto Sans KR', sans-serif;
+        --font-mono: 'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, Menlo, monospace;
+        --text-xs: 0.75rem;
+        --text-sm: 0.8125rem;
+        --text-base: 0.9375rem;
+        --text-lg: 1.0625rem;
+        --text-xl: 1.25rem;
+        --text-2xl: 1.625rem;
+        --leading-tight: 1.4;
+        --leading-normal: 1.65;
+        --leading-relaxed: 1.8;
+        --font-weight-bold: 700;
+        --spacing: 0.25rem;
+        --container-content: 46rem;
+        --radius-sm: 0.25rem;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-sans);
+        font-size: var(--text-base);
+        line-height: var(--leading-normal);
+        word-break: keep-all;
+        overflow-wrap: anywhere;
+      }
+      a { color: inherit; text-decoration: none; }
+      ul { list-style: none; margin: 0; padding: 0; }
+      h1, h2, h3, p, dl, dd { margin: 0; }
+      .wrap { max-width: var(--container-content); margin-inline: auto; padding-inline: calc(var(--spacing) * 5); }
+
+      /* ---- 시안 도구 막대(사이트에 들어가지 않는다) ---- */
+      .toolbar {
+        position: sticky; top: 0; z-index: 10;
+        display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+        padding: 8px 12px; background: #24292f; color: #fff; font: 12px/1.4 -apple-system, sans-serif;
+      }
+      .toolbar fieldset { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; border: 0; margin: 0; padding: 0; }
+      .toolbar legend { float: left; margin-right: 6px; color: #9da7b3; }
+      .toolbar button { border: 1px solid #57606a; background: transparent; color: #fff; border-radius: 4px; padding: 2px 8px; font: inherit; cursor: pointer; }
+      .toolbar button[aria-pressed='true'] { background: #fff; color: #24292f; }
+      .note {
+        margin-block: calc(var(--spacing) * 6) 0; padding: 10px 12px; border: 1px dashed #bf8700; background: #fff8c5;
+        font: 12px/1.6 -apple-system, sans-serif; color: #3b2300;
+      }
+      .note ul { list-style: disc; padding-left: 18px; }
+
+      /* ---- 사이트 스타일(변경 1 시안과 같다) ---- */
+      .site-header { border-bottom: 1px dashed var(--color-border); font-family: var(--font-mono); }
+      .site-header-inner {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: calc(var(--spacing) * 2) calc(var(--spacing) * 6); padding-block: calc(var(--spacing) * 5);
+      }
+      .site-name { font-weight: var(--font-weight-bold); }
+      .site-name::before { content: '~/'; color: var(--color-accent); }
+      .header-right { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--spacing) * 2) calc(var(--spacing) * 4); }
+      .menu { display: flex; gap: calc(var(--spacing) * 3); font-family: var(--font-sans); font-size: var(--text-sm); }
+      .menu a { color: var(--color-muted); }
+      .menu a::before, .menu a::after { font-family: var(--font-mono); color: transparent; }
+      .menu a::before { content: '['; }
+      .menu a::after { content: ']'; }
+      .lang-switch { font-size: var(--text-sm); color: var(--color-muted); }
+      .lang-switch b { color: var(--color-accent); }
+      .site-main { padding-block: calc(var(--spacing) * 12) calc(var(--spacing) * 16); }
+      .site-footer { border-top: 1px dashed var(--color-border); color: var(--color-muted); font-family: var(--font-mono); font-size: var(--text-sm); }
+      .site-footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: calc(var(--spacing) * 3); padding-block: calc(var(--spacing) * 8); }
+      .footer-links { display: flex; flex-wrap: wrap; gap: calc(var(--spacing) * 4); font-family: var(--font-sans); }
+      .footer-links a:hover { color: var(--color-accent); }
+
+      .block + .block { margin-top: calc(var(--spacing) * 14); }
+      .section-title { font-size: var(--text-base); font-weight: var(--font-weight-bold); margin-bottom: calc(var(--spacing) * 6); }
+      .section-title::before { content: '## '; color: var(--color-accent); font-family: var(--font-mono); }
+
+      .card-list { display: grid; gap: calc(var(--spacing) * 7); }
+      .card { display: flex; flex-direction: column; gap: calc(var(--spacing) * 1.5); padding-left: calc(var(--spacing) * 4); border-left: 2px solid var(--color-border); }
+      .card:hover { border-left-color: var(--color-accent); }
+      .card-title { font-size: var(--text-base); line-height: var(--leading-tight); }
+      .card-desc { color: var(--color-muted); }
+      .card-links { display: flex; flex-wrap: wrap; gap: calc(var(--spacing) * 4); font-size: var(--text-sm); }
+      .card-links a { color: var(--color-accent); }
+      .card-links a:hover { text-decoration: underline; }
+      .card-prefix { font-family: var(--font-mono); }
+
+      .about-info { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: calc(var(--spacing) * 3) calc(var(--spacing) * 6); font-size: var(--text-sm); }
+      .about-info dt { color: var(--color-muted); }
+      .about-info dt::after { content: ':'; }
+      .about-info a, .prose a { color: var(--color-accent); }
+      .about-info a:hover { text-decoration: underline; }
+      .about-links { display: flex; flex-wrap: wrap; gap: calc(var(--spacing) * 4); }
+
+      .prose { line-height: var(--leading-relaxed); }
+      .prose > * + * { margin-top: calc(var(--spacing) * 5); }
+      .prose ul { padding-left: calc(var(--spacing) * 6); list-style: '- '; }
+      .prose li + li { margin-top: calc(var(--spacing) * 1); }
+      .prose a { text-decoration: underline; text-underline-offset: 0.2em; }
+
+      /* ---- 이 변경에서 새로 생기는 부분: 외부 링크 표시 ---- */
+      /* 공통: 표시는 링크 안 마지막(링크 글자 span 뒤)에 붙는다.
+         - 표시 앞에 줄바꿈하지 않는 글자(U+2060)를 둬, 표시만 다음 줄로 떨어지지 않게 한다.
+           그래서 표시는 inline-block이 아니라 일반 인라인이다(inline-block 앞은 U+2060이 있어도 줄바꿈될 수 있다).
+         - 본문 링크의 밑줄은 링크 글자(.label)에만 긋는다. 링크 전체에 그으면 인라인인 표시까지 밑줄이 이어진다. */
+      .ext { display: inline; }
+      .prose a.external { text-decoration: none; }
+      .prose a.external .label { text-decoration: underline; text-underline-offset: 0.2em; }
+      /* A안: 고정폭 글자 기호 ↗, 링크와 같은 색·크기 */
+      [data-option='a'] .ext::before { content: '↗'; font-family: var(--font-mono); margin-left: calc(var(--spacing) * 0.5); }
+      /* B안: 작은 SVG 아이콘(상자에서 나가는 화살표), 링크와 같은 색.
+         빈 인라인 요소에 가로 안쪽 여백으로 폭을 주고, 글자색 배경을 아이콘 모양으로 오려 낸다(mask). */
+      [data-option='b'] .ext {
+        padding-left: 0.8em; margin-left: calc(var(--spacing) * 1);
+        background: currentColor;
+        -webkit-mask: var(--icon) no-repeat center / contain; mask: var(--icon) no-repeat center / contain;
+        --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3H3.5A.5.5 0 0 0 3 3.5v9a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V9'/%3E%3Cpath d='M10 2.5h3.5V6M13.5 2.5 7.5 8.5'/%3E%3C/svg%3E");
+      }
+      /* C안: A안의 ↗를 작게(text-xs), 흐린 글자색으로. 마우스를 올리면 링크의 hover 색을 따른다 */
+      [data-option='c'] .ext::before { content: '↗'; font-family: var(--font-mono); font-size: var(--text-xs); margin-left: calc(var(--spacing) * 0.5); color: var(--color-muted); }
+      [data-option='c'] a:hover .ext::before { color: inherit; }
+      [data-option='c'] .footer-links a:hover .ext::before { color: var(--color-accent); }
+
+      /* 화면 낭독기 문구: 평소에는 숨기고(sr-only), "낭독 문구 보기"를 켜면 점선 상자로 보인다 */
+      .sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      [data-sr='show'] .sr {
+        position: static; width: auto; height: auto; margin: 0 0 0 4px; clip: auto; overflow: visible; white-space: normal;
+        padding: 0 3px; border: 1px dashed #bf8700; background: #fff8c5; color: #3b2300; font: 11px/1.4 -apple-system, sans-serif; text-decoration: none; display: inline-block;
+      }
+
+      /* 비교 화면: 세 안을 한 번에 */
+      .compare { display: grid; gap: calc(var(--spacing) * 10); }
+      .compare-item { border-top: 1px dashed var(--color-border); padding-top: calc(var(--spacing) * 6); }
+      .compare-label { font: 12px/1.4 -apple-system, sans-serif; color: #9a6700; margin-bottom: calc(var(--spacing) * 4); }
+      .compare-label b { color: #3b2300; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // 시안 상태. 도구 막대가 바꾼다.
+      const state = { option: 'a', card: 'suffix', lang: 'ko', view: 'all', sr: 'hide' };
+
+      const OPTIONS = {
+        a: { ko: 'A안: ↗ 글자 기호(링크와 같은 색·크기)', en: 'A: ↗ glyph (same color and size as the link)' },
+        b: { ko: 'B안: 작은 SVG 아이콘(링크와 같은 색)', en: 'B: small SVG icon (same color as the link)' },
+        c: { ko: 'C안: ↗ 작게, 흐린 글자색(마우스를 올리면 링크 색)', en: 'C: small ↗ in muted color (link color on hover)' },
+      };
+
+      // 화면 문구. ko·en 짝으로 둔다.
+      const T = {
+        newTab: { ko: '(새 탭에서 열림)', en: '(opens in a new tab)' },
+        menu: { ko: ['포트폴리오', '블로그', '소개'], en: ['Portfolio', 'Blog', 'About'] },
+        portfolio: { ko: '포트폴리오 카드', en: 'Portfolio cards' },
+        about: { ko: '소개 페이지', en: 'About page' },
+        post: { ko: '글 본문', en: 'Post body' },
+        email: { ko: '이메일', en: 'Email' },
+        links: { ko: '링크', en: 'Links' },
+        cards: {
+          ko: [
+            {
+              name: '개인 사이트',
+              desc: '이 사이트. Astro로 만든 정적 사이트로, md 파일을 push하면 배포된다.',
+              links: [['소개 글', '/blog/site/', false], ['GitHub', 'https://github.com/', true]],
+            },
+            {
+              name: '링크 이름이 긴 프로젝트',
+              desc: '좁은 화면에서 링크가 줄바꿈될 때 표시가 어떻게 보이는지 확인한다.',
+              links: [['데모 페이지와 프로젝트 소개 영상 모음', 'https://example.com/', true], ['문서', 'https://example.com/docs', true]],
+            },
+          ],
+          en: [
+            {
+              name: 'Personal site',
+              desc: 'This site. A static site built with Astro, deployed by pushing md files.',
+              links: [['Write-up', '/en/blog/site/', false], ['GitHub', 'https://github.com/', true]],
+            },
+            {
+              name: 'A project with long link labels',
+              desc: 'Checks how the marker looks when a link wraps on a narrow screen.',
+              links: [['Collection of demo pages and project introduction videos', 'https://example.com/', true], ['Docs', 'https://example.com/docs', true]],
+            },
+          ],
+        },
+        aboutLinks: { ko: [['GitHub', true], ['npm', true], ['사이트 소개 글', false]], en: [['GitHub', true], ['npm', true], ['About this site', false]] },
+      };
+      const t = (key) => T[key][state.lang];
+
+      // 링크 하나. external이면 새 탭 속성, 표시, 화면 낭독기 문구를 붙인다(실제 구현의 링크 컴포넌트·md 플러그인이 할 일).
+      function link(label, href, external, opts = {}) {
+        if (!external) return `<a href="${href}">${opts.prefix ?? ''}${label}</a>`;
+        const swap = opts.cardSwap;
+        const prefix = swap ? '<span class="card-prefix" aria-hidden="true">↗ </span>' : opts.prefix ?? '';
+        const marker = swap ? '' : '⁠<span class="ext" aria-hidden="true"></span>';
+        return `<a class="external" href="${href}" target="_blank" rel="noopener">${prefix}<span class="label">${label}</span>${marker}<span class="sr">${t('newTab')}</span></a>`;
+      }
+
+      function cardLinks(links) {
+        return links
+          .map(([label, href, ext]) => {
+            const swap = state.card === 'swap';
+            const prefix = '<span class="card-prefix" aria-hidden="true">→ </span>';
+            return `<li>${link(label, href, ext, { prefix, cardSwap: swap && ext })}</li>`;
+          })
+          .join('');
+      }
+
+      function portfolio() {
+        return `<section class="block"><h2 class="section-title">${t('portfolio')}</h2><ul class="card-list">${t('cards')
+          .map(
+            (c) => `<li class="card"><h3 class="card-title">${c.name}</h3><p class="card-desc">${c.desc}</p><ul class="card-links">${cardLinks(c.links)}</ul></li>`,
+          )
+          .join('')}</ul></section>`;
+      }
+
+      function about() {
+        const links = t('aboutLinks')
+          .map(([label, ext]) => `<li>${link(label, ext ? 'https://example.com/' : '/blog/site/', ext)}</li>`)
+          .join('');
+        return `<section class="block"><h2 class="section-title">${t('about')}</h2><dl class="about-info">
+          <dt>${t('email')}</dt><dd><a href="mailto:mivomad33@gmail.com">mivomad33@gmail.com</a></dd>
+          <dt>${t('links')}</dt><dd><ul class="about-links">${links}</ul></dd></dl></section>`;
+      }
+
+      function post() {
+        const ko = `<p>Astro의 ${link('콘텐츠 컬렉션 문서', 'https://docs.astro.build/', true)}를 보면 글 폴더 구조를 바꾸는 방법이 나온다. 같은 내용을 ${link('지난 글', '/blog/prev/', false)}에서도 다뤘다.</p>
+          <p>링크가 문장 끝에서 줄바꿈되는 경우: 이 문장은 일부러 길게 써서 마지막에 오는 ${link('외부 참고 자료 링크가 두 줄에 걸치도록', 'https://example.com/', true)} 만든다.</p>
+          <ul><li>${link('MDN: target 속성', 'https://developer.mozilla.org/', true)}</li><li>${link('https://docs.astro.build/ko/guides/markdown-content/', 'https://docs.astro.build/ko/guides/markdown-content/', true)}</li></ul>`;
+        const en = `<p>The Astro ${link('content collections docs', 'https://docs.astro.build/', true)} explain how to change the post folder structure. I also covered this in ${link('the previous post', '/en/blog/prev/', false)}.</p>
+          <p>A link that wraps at the end of a sentence: this sentence is intentionally long so that the ${link('external reference link at the end spans two lines', 'https://example.com/', true)} on narrow screens.</p>
+          <ul><li>${link('MDN: the target attribute', 'https://developer.mozilla.org/', true)}</li><li>${link('https://docs.astro.build/en/guides/markdown-content/', 'https://docs.astro.build/en/guides/markdown-content/', true)}</li></ul>`;
+        return `<section class="block"><h2 class="section-title">${t('post')}</h2><div class="prose">${state.lang === 'ko' ? ko : en}</div></section>`;
+      }
+
+      function footer() {
+        return `<footer class="site-footer"><div class="wrap site-footer-inner"><p>© 2026 mivomad33</p><ul class="footer-links">
+          <li><a href="mailto:mivomad33@gmail.com">mivomad33@gmail.com</a></li><li>${link('GitHub', 'https://github.com/mivomad33', true)}</li></ul></div></footer>`;
+      }
+
+      function header() {
+        const menu = t('menu').map((m) => `<a href="#">${m}</a>`).join('');
+        const sw = state.lang === 'ko' ? '<b>ko</b>/en' : 'ko/<b>en</b>';
+        return `<header class="site-header"><div class="wrap site-header-inner"><a class="site-name" href="#">mivomad33</a>
+          <div class="header-right"><nav class="menu">${menu}</nav><span class="lang-switch">${sw}</span></div></div></header>`;
+      }
+
+      function note() {
+        return `<div class="note"><b>보는 법</b><ul>
+          <li>외부 링크: GitHub, npm, 문서, 데모 등. 사이트 안 링크(소개 글, 지난 글)와 이메일(mailto)에는 표시가 없다. 링크를 누르면 실제로 새 탭이 열린다.</li>
+          <li>"낭독 문구 보기"를 켜면 화면 낭독기만 읽는 문구(평소에는 보이지 않는다)를 노란 상자로 보여 준다.</li>
+          <li>"카드 링크": 포트폴리오 카드 링크는 앞에 → 가 있다. "뒤에 붙이기"는 → 를 두고 뒤에 표시를 더하고, "앞 기호 바꾸기"는 외부 링크만 앞 기호를 ↗ 로 바꾼다(뒤 표시 없음).</li>
+          <li>모바일 확인: 브라우저 폭을 375px로 줄이면 긴 링크가 줄바꿈된다. 표시만 다음 줄로 떨어지지 않는다.</li></ul></div>`;
+      }
+
+      function page() {
+        return `${header()}<main class="site-main"><div class="wrap">${portfolio()}${about()}${post()}</div></main>${footer()}`;
+      }
+
+      function compare() {
+        const original = state.option;
+        const items = Object.keys(OPTIONS)
+          .map((key) => {
+            state.option = key;
+            return `<div class="compare-item" data-option="${key}"><p class="compare-label"><b>${OPTIONS[key][state.lang]}</b></p>${portfolio()}${about()}${post()}</div>`;
+          })
+          .join('');
+        state.option = original;
+        return `${header()}<main class="site-main"><div class="wrap"><div class="compare">${items}</div></div></main>${footer()}`;
+      }
+
+      function toolbar() {
+        const group = (legend, key, choices) =>
+          `<fieldset><legend>${legend}</legend>${choices
+            .map(([value, label]) => `<button type="button" data-key="${key}" data-value="${value}" aria-pressed="${state[key] === value}">${label}</button>`)
+            .join('')}</fieldset>`;
+        return `<div class="toolbar">${group('화면', 'view', [['all', '모든 곳'], ['compare', '세 안 비교']])}${group('표시 안', 'option', [['a', 'A ↗'], ['b', 'B 아이콘'], ['c', 'C 작은 ↗']])}${group('카드 링크', 'card', [['suffix', '뒤에 붙이기'], ['swap', '앞 기호 바꾸기']])}${group('언어', 'lang', [['ko', '한국어'], ['en', 'English']])}${group('낭독 문구', 'sr', [['hide', '숨기기'], ['show', '보기']])}</div>`;
+      }
+
+      function render() {
+        document.documentElement.lang = state.lang;
+        const app = document.getElementById('app');
+        // 비교 화면에서는 안마다 자기 상자에 data-option을 두므로, 바깥에는 두지 않는다(두 안의 규칙이 겹치지 않게).
+        app.dataset.option = state.view === 'all' ? state.option : '';
+        app.dataset.sr = state.sr;
+        app.innerHTML = `${toolbar()}<div class="wrap">${note()}</div>${state.view === 'all' ? page() : compare()}`;
+        // 표시 안 버튼은 비교 화면에서 쓸모가 없으므로 흐리게 둔다.
+        app.querySelectorAll('[data-key="option"]').forEach((b) => (b.disabled = state.view === 'compare'));
+      }
+
+      document.addEventListener('click', (e) => {
+        const button = e.target.closest('.toolbar button');
+        if (button) {
+          state[button.dataset.key] = button.dataset.value;
+          render();
+          return;
+        }
+        // 시안 안의 사이트 안 링크는 이동하지 않게 막는다(외부 링크는 실제로 새 탭이 열린다).
+        const a = e.target.closest('a');
+        if (a && !a.target) e.preventDefault();
+      });
+
+      render();
+    </script>
+  </body>
+</html>
