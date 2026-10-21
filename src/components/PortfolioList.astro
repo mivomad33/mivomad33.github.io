@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import type { PortfolioItem } from '../lib/portfolio';
 import PortfolioCard from './PortfolioCard.astro';
 
 // 포트폴리오 카드 목록. 포트폴리오 페이지와 홈의 최근 포트폴리오가 같이 쓴다.
 interface Props {
-  items: CollectionEntry<'portfolio'>['data'][];
+  items: PortfolioItem[];
   headingLevel: 2 | 3;
 }
 

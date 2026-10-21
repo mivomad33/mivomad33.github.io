@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import EmptyNotice from '../../../components/EmptyNotice.astro';
+import PageTitle from '../../../components/PageTitle.astro';
+import PortfolioList from '../../../components/PortfolioList.astro';
+import { getPortfolio } from '../../../lib/portfolio';
+import { getProfile } from '../../../lib/profile';
+import { localeStaticPaths, UI, type Locale } from '../../../lib/i18n';
+
+// 포트폴리오(언어마다 하나). 모든 항목을 파일에 적은 순서대로 카드로 보여 준다.
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = UI[locale];
+const portfolio = await getPortfolio(locale);
+const profile = await getProfile(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={ui.menu.portfolio}
+  description={ui.portfolioDescription(profile.name)}
+>
+  <PageTitle>{ui.menu.portfolio}</PageTitle>
+  {
+    portfolio.length > 0 ? (
+      <PortfolioList items={portfolio} headingLevel={2} />
+    ) : (
+      <EmptyNotice locale={locale} />
+    )
+  }
+</BaseLayout>

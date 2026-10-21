@@ -1,6 +1,6 @@
 #!/bin/sh
-# OG 이미지와 파비콘 PNG를 원본(og-image.html, favicon.svg)에서 만들어 public/에 넣는다(7단계).
-# 프로필의 활동명·한 줄 소개나 원본을 바꾸면 다시 실행한다: sh docs/stages/7-seo/make-images.sh
+# OG 이미지와 파비콘 PNG를 원본(og-image.html, og-image-en.html, favicon.svg)에서 만들어 public/에 넣는다(7단계, 영어 OG 이미지는 변경 1).
+# 프로필의 활동명·한 줄 소개(두 언어)나 원본을 바꾸면 다시 실행한다: sh docs/stages/7-seo/make-images.sh
 # macOS의 Google Chrome으로 렌더링한다(이미지 처리 패키지를 따로 설치하지 않기 위해서다).
 set -eu
 SRC="$(cd "$(dirname "$0")" && pwd)"
@@ -21,6 +21,10 @@ done
 "$CHROME" --headless --disable-gpu --hide-scrollbars --allow-file-access-from-files \
   --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=3000 \
   --screenshot="$OUT/og.png" "file://$SRC/og-image.html" 2>/dev/null
+# 영어 OG 이미지(변경 1): 같은 모양에 한 줄 소개만 영어다.
+"$CHROME" --headless --disable-gpu --hide-scrollbars --allow-file-access-from-files \
+  --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=3000 \
+  --screenshot="$OUT/og-en.png" "file://$SRC/og-image-en.html" 2>/dev/null
 
 cp "$SRC/favicon.svg" "$OUT/favicon.svg"
 
@@ -41,4 +45,4 @@ shot() { # 크기 파일 배경색 이미지-크기
 shot 96 favicon-96.png transparent 96
 shot 180 apple-touch-icon.png "#fcfcfc" 132
 
-echo "만든 파일: $OUT/og.png favicon.svg favicon-96.png apple-touch-icon.png"
+echo "만든 파일: $OUT/og.png og-en.png favicon.svg favicon-96.png apple-touch-icon.png"

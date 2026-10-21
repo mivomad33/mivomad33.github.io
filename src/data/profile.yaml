@@ -1,5 +1,7 @@
 name: mivomad33
-intro: 1인 사업가를 꿈꾸는 개발자
+intro:
+  ko: 1인 사업가를 꿈꾸는 개발자
+  en: A developer who dreams of becoming a solo entrepreneur
 email: mivomad33@gmail.com
 links:
   - label: GitHub

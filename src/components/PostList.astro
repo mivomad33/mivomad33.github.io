@@ -1,20 +1,22 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import type { Post } from '../lib/blog';
+import type { Locale } from '../lib/i18n';
 import PostListItem from './PostListItem.astro';
 
 // 글 목록. 글 목록 페이지와 홈의 최근 글이 같이 쓴다.
 interface Props {
-  posts: CollectionEntry<'blog'>[];
+  locale: Locale;
+  posts: Post[];
   headingLevel: 2 | 3;
 }
 
-const { posts, headingLevel } = Astro.props;
+const { locale, posts, headingLevel } = Astro.props;
 ---
 
 <ul class="grid gap-6">
   {
     posts.map((post) => (
-      <PostListItem post={post} headingLevel={headingLevel} />
+      <PostListItem locale={locale} post={post} headingLevel={headingLevel} />
     ))
   }
 </ul>

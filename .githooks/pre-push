@@ -1,0 +1,15 @@
+#!/bin/sh
+# push 전에 검증(pnpm verify: 타입 검사·lint·포맷 검사·빌드·빌드 결과 검사)을 돌려, 실패하면 push를 멈춘다(변경 1).
+# 글·포트폴리오에 한국어·영어 중 한쪽이 빠졌을 때 push 전에 알기 위해서다. 실제로 배포를 막는 것은 CI의 빌드다.
+# pnpm install의 prepare 스크립트가 이 폴더를 Git 훅 폴더(core.hooksPath)로 연결한다.
+# 커밋한 내용이 아니라 작업 폴더를 검사한다. 급할 때 건너뛰려면 git push --no-verify(CI 검증은 그대로 한다).
+# GUI Git 도구처럼 PATH가 다른 곳에서는 pnpm을 못 찾을 수 있어, 검증 실패와 구분해 알린다.
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "pre-push: pnpm을 찾지 못해 검증을 할 수 없어 push를 멈췄다. 터미널에서 push하거나 PATH에 pnpm을 넣는다." >&2
+  exit 1
+fi
+echo "pre-push: pnpm verify를 실행한다."
+if ! pnpm verify; then
+  echo "pre-push: 검증이 실패해 push를 멈췄다. 위 오류를 고친 뒤 다시 push한다." >&2
+  exit 1
+fi

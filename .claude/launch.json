@@ -14,6 +14,12 @@
       "port": 4400
     },
     {
+      "name": "repo-files",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4401"],
+      "port": 4401
+    },
+    {
       "name": "site-preview",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [

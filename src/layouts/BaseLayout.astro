@@ -8,12 +8,26 @@ import { getProfile } from '../lib/profile';
 import { ALLOW_INDEXING, siteUrl } from '../lib/site';
 import { OG_IMAGE, blogPostingJsonLd, type ArticleDates } from '../lib/seo';
 import { formatDate } from '../lib/format-date';
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  X_DEFAULT_LOCALE,
+  OG_LOCALE,
+  UI,
+  localePath,
+  otherLocale,
+  pathWithoutLocale,
+  type Locale,
+} from '../lib/i18n';
 
 // 메타 태그 규칙은 docs/design.md의 "메타 태그"를 따른다.
-// 일반 페이지는 설명이 필수이고, 글 보기는 날짜(article)를 더 넘긴다.
-// 404는 notFound로 표시하며 설명·canonical·OG 태그를 넣지 않는다.
+// 일반 페이지는 언어와 설명이 필수이고, 글 보기는 날짜(article)를 더 넘긴다.
+// 404는 notFound로 표시하며 설명·canonical·OG 태그와 언어 전환 링크를 넣지 않는다.
+// 404는 사이트에 하나라 한국어 페이지로 두고 영어를 함께 쓴다(변경 1).
 type Props =
   | {
+      // 페이지 언어(변경 1). 문서 언어, 메뉴, 푸터, 메타 태그가 이 언어를 따른다.
+      locale: Locale;
       // 페이지 제목. 없으면(홈) 사이트 이름만 쓴다.
       title?: string;
       description: string;
@@ -24,10 +38,12 @@ type Props =
 
 const props = Astro.props;
 const { title } = props;
-const profile = await getProfile();
+const locale = props.notFound ? DEFAULT_LOCALE : props.locale;
+const ui = UI[locale];
+const profile = await getProfile(locale);
 const pageTitle = title ? `${title} - ${profile.name}` : profile.name;
 
-const ogImage = siteUrl(OG_IMAGE.path);
+const ogImage = siteUrl(OG_IMAGE.path[locale]);
 const ogImageAlt = `${profile.name} - ${profile.intro}`;
 // 주소를 대표하는 태그. 404는 없는 모든 주소에 같은 내용으로 나가므로 넣지 않는다.
 const meta = props.notFound
@@ -42,21 +58,35 @@ const jsonLd =
   meta?.article &&
   blogPostingJsonLd({
     url: meta.canonical,
+    inLanguage: locale,
     title: meta.ogTitle,
     description: meta.description,
     dates: meta.article,
     image: ogImage,
-    author: { name: profile.name, url: siteUrl('/about/') },
+    author: { name: profile.name, url: siteUrl(localePath(locale, '/about/')) },
   });
 
-const menu = [
-  { href: '/portfolio/', label: '포트폴리오' },
-  { href: '/blog/', label: '블로그' },
-  { href: '/about/', label: '소개' },
-];
+const menu = (['portfolio', 'blog', 'about'] as const).map((key) => ({
+  href: localePath(locale, `/${key}/`),
+  label: ui.menu[key],
+}));
 // 현재 메뉴: 주소가 메뉴 주소로 시작하면 그 메뉴다(글 보기 /blog/<slug>/는 "블로그"). 홈은 표시 없음.
 const pathname = Astro.url.pathname;
 const isCurrent = (href: string) => pathname.startsWith(href);
+
+// 언어 전환 링크(변경 1): 지금 페이지의 다른 언어 버전으로 가는 링크 하나. 화면에는 언어 코드를
+// `ko/en`처럼 보이고(지금 언어는 강조색 굵게), 화면 낭독기에는 이동할 언어 이름을 읽힌다.
+const basePath = pathWithoutLocale(locale, pathname);
+const switchTo = otherLocale(locale);
+const switchHref = localePath(switchTo, basePath);
+// 언어별 버전(hreflang, 변경 1): 모든 언어 버전과 x-default. 자기 자신도 넣는다.
+const alternates = [
+  ...LOCALES.map((code) => ({ hreflang: code, locale: code })),
+  { hreflang: 'x-default', locale: X_DEFAULT_LOCALE },
+].map(({ hreflang, locale: code }) => ({
+  hreflang,
+  href: siteUrl(localePath(code, basePath)),
+}));
 
 const footerLinks = [
   { label: profile.email, url: `mailto:${profile.email}` },
@@ -65,7 +95,7 @@ const footerLinks = [
 const year = new Date().getFullYear();
 ---
 
-<html lang="ko">
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -79,6 +109,9 @@ const year = new Date().getFullYear();
         <>
           <meta name="description" content={meta.description} />
           <link rel="canonical" href={meta.canonical} />
+          {alternates.map(({ hreflang, href }) => (
+            <link rel="alternate" hreflang={hreflang} href={href} />
+          ))}
           <meta
             property="og:type"
             content={meta.article ? 'article' : 'website'}
@@ -87,7 +120,10 @@ const year = new Date().getFullYear();
           <meta property="og:description" content={meta.description} />
           <meta property="og:url" content={meta.canonical} />
           <meta property="og:site_name" content={profile.name} />
-          <meta property="og:locale" content="ko_KR" />
+          <meta property="og:locale" content={OG_LOCALE[locale]} />
+          {LOCALES.filter((code) => code !== locale).map((code) => (
+            <meta property="og:locale:alternate" content={OG_LOCALE[code]} />
+          ))}
           <meta property="og:image" content={ogImage} />
           <meta property="og:image:width" content={String(OG_IMAGE.width)} />
           <meta property="og:image:height" content={String(OG_IMAGE.height)} />
@@ -119,54 +155,88 @@ const year = new Date().getFullYear();
       <Container
         class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-5"
       >
-        <a href="/" class="font-bold"
+        <a href={localePath(locale, '/')} class="font-bold"
           ><span class="text-accent">~/</span>{profile.name}</a
         >
-        <nav aria-label="주 메뉴">
-          <ul class="flex gap-3 font-sans text-sm">
-            {
-              menu.map(({ href, label }) => {
-                const current = isCurrent(href);
-                return (
-                  <li>
-                    <a
-                      href={href}
-                      aria-current={current ? 'page' : undefined}
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <nav aria-label={ui.navLabel}>
+            <ul class="flex gap-3 font-sans text-sm">
+              {
+                menu.map(({ href, label }) => {
+                  const current = isCurrent(href);
+                  return (
+                    <li>
+                      <a
+                        href={href}
+                        aria-current={current ? 'page' : undefined}
+                        class:list={
+                          current
+                            ? 'font-bold text-accent'
+                            : 'text-muted hover:text-text'
+                        }
+                      >
+                        <span
+                          class:list={[
+                            'font-mono',
+                            !current && 'text-transparent',
+                          ]}
+                          aria-hidden="true"
+                        >
+                          [
+                        </span>
+                        {label}
+                        <span
+                          class:list={[
+                            'font-mono',
+                            !current && 'text-transparent',
+                          ]}
+                          aria-hidden="true"
+                        >
+                          ]
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })
+              }
+            </ul>
+          </nav>
+          {
+            !props.notFound && (
+              <a
+                href={switchHref}
+                hreflang={switchTo}
+                lang={switchTo}
+                aria-label={UI[switchTo].languageName}
+                class="group flex items-baseline gap-0.5 font-mono text-sm text-muted"
+              >
+                {LOCALES.map((code, index) => (
+                  <>
+                    {index > 0 && (
+                      <span class="group-hover:text-text" aria-hidden="true">
+                        /
+                      </span>
+                    )}
+                    <span
                       class:list={
-                        current
+                        code === locale
                           ? 'font-bold text-accent'
-                          : 'text-muted hover:text-text'
+                          : 'group-hover:text-text'
                       }
                     >
-                      <span
-                        class:list={[
-                          'font-mono',
-                          !current && 'text-transparent',
-                        ]}
-                        aria-hidden="true"
-                      >
-                        [
-                      </span>
-                      {label}
-                      <span
-                        class:list={[
-                          'font-mono',
-                          !current && 'text-transparent',
-                        ]}
-                        aria-hidden="true"
-                      >
-                        ]
-                      </span>
-                    </a>
-                  </li>
-                );
-              })
-            }
-          </ul>
-        </nav>
+                      {code}
+                    </span>
+                  </>
+                ))}
+              </a>
+            )
+          }
+        </div>
       </Container>
     </header>
-    <!-- 내용이 적어도 푸터가 화면 맨 아래에 붙도록 본문이 남는 높이를 채운다. -->
+    {
+      /* 내용이 적어도 푸터가 화면 맨 아래에 붙도록 본문이 남는 높이를 채운다. */
+    }
     <main class="flex-1">
       <Container class="pt-12 pb-16">
         <slot />

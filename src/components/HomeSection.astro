@@ -1,12 +1,15 @@
 ---
+import { UI, type Locale } from '../lib/i18n';
+
 // 홈의 영역(최근 포트폴리오, 최근 글). 제목 앞에 강조색 `## `, 오른쪽에 전체 목록 링크.
 interface Props {
+  locale: Locale;
   title: string;
-  // 전체 목록 주소(예: /portfolio/)
+  // 전체 목록 주소(그 언어의 주소, 예: /portfolio/, /en/portfolio/)
   moreHref: string;
 }
 
-const { title, moreHref } = Astro.props;
+const { locale, title, moreHref } = Astro.props;
 ---
 
 <section>
@@ -15,7 +18,7 @@ const { title, moreHref } = Astro.props;
       <span class="font-mono text-accent" aria-hidden="true">## </span>{title}
     </h2>
     <a href={moreHref} class="shrink-0 text-sm text-muted hover:text-accent">
-      전체 보기<span class="font-mono" aria-hidden="true"> →</span>
+      {UI[locale].viewAll}<span class="font-mono" aria-hidden="true"> →</span>
     </a>
   </div>
   <slot />

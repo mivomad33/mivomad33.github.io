@@ -1,5 +1,12 @@
 ---
+import { UI, type Locale } from '../lib/i18n';
+
 // 목록이 비었을 때의 안내 문구(design.md 페이지 구성). 포트폴리오와 글 목록 페이지가 같이 쓴다.
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
 ---
 
-<p class="text-muted">아직 항목이 없습니다.</p>
+<p class="text-muted">{UI[locale].empty}</p>

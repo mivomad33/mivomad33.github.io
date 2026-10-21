@@ -1,0 +1,618 @@
+/* 변경 1 시안의 사이트 스타일. 3단계 기준 시안(docs/stages/3-ui-design/c-mono.html)의 스타일을 그대로 옮기고,
+   실제 사이트와 달라진 점(홈 한 줄 소개 없음, 404 링크 강조색)과 이 변경에서 새로 생기는 부분만 끝에 더했다. */
+/* 디자인 값. @theme로 그대로 옮길 수 있는 이름을 쓰고, 아래 스타일은 이 변수만 쓴다.
+   (테두리 두께와 화면 폭 기준 40rem = Tailwind 기본 sm은 Tailwind 기본 값이라 그대로 적는다.)
+   고정폭 글꼴에 한글이 없고 공백이 넓어 한글 문장이 벌어져 보이므로,
+   한글이 들어가는 문장(제목, 소개, 링크명, 화면 문구)은 고딕(--font-sans)으로 쓰고
+   기호(~/, #, >, [ ], →), 날짜, 사이트 이름만 고정폭(--font-mono)으로 쓴다. */
+:root {
+  --color-bg: #fcfcfc;
+  --color-surface: #f3f4f6;
+  --color-text: #1f2328;
+  --color-muted: #656d76;
+  --color-border: #d0d7de;
+  --color-accent: #1a7f37;
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Noto Sans KR', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, Menlo, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.625rem;
+  --leading-tight: 1.4;
+  --leading-normal: 1.65;
+  --leading-relaxed: 1.8;
+  --font-weight-bold: 700;
+  --spacing: 0.25rem;
+  --container-content: 46rem;
+  --radius-sm: 0.25rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+h1,
+h2,
+h3,
+p,
+dl,
+dd {
+  margin: 0;
+}
+.wrap {
+  max-width: var(--container-content);
+  margin-inline: auto;
+  padding-inline: calc(var(--spacing) * 5);
+}
+
+/* 헤더 */
+.site-header {
+  border-bottom: 1px dashed var(--color-border);
+  font-family: var(--font-mono);
+}
+.site-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 2) calc(var(--spacing) * 6);
+  padding-block: calc(var(--spacing) * 5);
+}
+.site-name {
+  font-weight: var(--font-weight-bold);
+}
+.site-name::before {
+  content: '~/';
+  color: var(--color-accent);
+}
+.menu {
+  display: flex;
+  gap: calc(var(--spacing) * 3);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+}
+.menu a {
+  color: var(--color-muted);
+}
+/* 현재 메뉴를 [ ]로 감싼다. 다른 메뉴도 투명한 괄호를 둬 글자 위치가 바뀌지 않게 한다. */
+.menu a::before,
+.menu a::after {
+  font-family: var(--font-mono);
+}
+.menu a::before {
+  content: '[';
+  color: transparent;
+}
+.menu a::after {
+  content: ']';
+  color: transparent;
+}
+.menu a:hover {
+  color: var(--color-text);
+}
+.menu a[aria-current='page'] {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+.menu a[aria-current='page']::before,
+.menu a[aria-current='page']::after {
+  color: var(--color-accent);
+}
+
+.site-main {
+  padding-block: calc(var(--spacing) * 12) calc(var(--spacing) * 16);
+}
+
+/* 푸터 */
+.site-footer {
+  border-top: 1px dashed var(--color-border);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+.site-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 3);
+  padding-block: calc(var(--spacing) * 8);
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 4);
+  font-family: var(--font-sans);
+}
+.footer-links a:hover {
+  color: var(--color-accent);
+}
+
+/* 홈 */
+.home-intro {
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--leading-tight);
+  margin-bottom: calc(var(--spacing) * 14);
+}
+.home-intro::before {
+  content: '> ';
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+}
+.home-section + .home-section {
+  margin-top: calc(var(--spacing) * 14);
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 4);
+  margin-bottom: calc(var(--spacing) * 6);
+}
+.section-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-bold);
+}
+.section-title::before {
+  content: '## ';
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+}
+.section-more {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+.section-more::after {
+  content: ' →';
+}
+.section-more:hover {
+  color: var(--color-accent);
+}
+
+.page-title {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  margin-bottom: calc(var(--spacing) * 10);
+}
+.page-title::before {
+  content: '# ';
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+}
+
+/* 포트폴리오: 왼쪽 선으로 구분한 목록 */
+.card-list {
+  display: grid;
+  gap: calc(var(--spacing) * 7);
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 1.5);
+  padding-left: calc(var(--spacing) * 4);
+  border-left: 2px solid var(--color-border);
+}
+.card:hover {
+  border-left-color: var(--color-accent);
+}
+.card-title {
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+}
+.card-desc {
+  color: var(--color-muted);
+}
+.card-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 4);
+  font-size: var(--text-sm);
+}
+.card-links a {
+  color: var(--color-accent);
+}
+.card-links a::before {
+  content: '→ ';
+  font-family: var(--font-mono);
+}
+.card-links a:hover {
+  text-decoration: underline;
+}
+
+/* 글 목록: 날짜를 제목 앞에 둔다 */
+.post-list {
+  display: grid;
+  gap: calc(var(--spacing) * 6);
+}
+.post-item {
+  display: grid;
+  gap: calc(var(--spacing) * 0.5) calc(var(--spacing) * 5);
+}
+@media (min-width: 40rem) {
+  .post-item {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+  .post-item-desc {
+    grid-column: 2;
+  }
+}
+.post-item-date {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  padding-top: calc(var(--spacing) * 0.5);
+}
+.post-item-title {
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+}
+.post-item-title a:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+.post-item-desc {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+/* 소개 */
+.about-intro {
+  margin-top: calc(var(--spacing) * -6);
+  margin-bottom: calc(var(--spacing) * 10);
+  color: var(--color-muted);
+}
+.about-info {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: calc(var(--spacing) * 3) calc(var(--spacing) * 6);
+  font-size: var(--text-sm);
+}
+.about-info dt {
+  color: var(--color-muted);
+}
+.about-info dt::after {
+  content: ':';
+}
+.about-info a,
+.prose a {
+  color: var(--color-accent);
+}
+.about-info a:hover {
+  text-decoration: underline;
+}
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 4);
+}
+
+/* 글 보기 */
+.post-header {
+  margin-bottom: calc(var(--spacing) * 10);
+}
+.post-title {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+}
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 3);
+  margin-top: calc(var(--spacing) * 3);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+/* "수정"은 한글이므로 고딕, 날짜만 고정폭 */
+.post-updated {
+  font-family: var(--font-sans);
+}
+.post-updated::before {
+  content: '·';
+  margin-right: calc(var(--spacing) * 3);
+}
+.post-updated time {
+  font-family: var(--font-mono);
+}
+
+.prose {
+  line-height: var(--leading-relaxed);
+}
+.prose > * + * {
+  margin-top: calc(var(--spacing) * 5);
+}
+.prose h2,
+.prose h3 {
+  line-height: var(--leading-tight);
+}
+.prose h2 {
+  margin-top: calc(var(--spacing) * 12);
+  font-size: var(--text-xl);
+}
+.prose h3 {
+  margin-top: calc(var(--spacing) * 8);
+  font-size: var(--text-lg);
+}
+.prose h2::before,
+.prose h3::before {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+}
+.prose h2::before {
+  content: '## ';
+}
+.prose h3::before {
+  content: '### ';
+}
+.prose ul,
+.prose ol {
+  padding-left: calc(var(--spacing) * 6);
+}
+.prose ul {
+  list-style: '- ';
+}
+.prose li + li {
+  margin-top: calc(var(--spacing) * 1);
+}
+.prose a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-left: calc(var(--spacing) * 4);
+  border-left: 2px solid var(--color-accent);
+  color: var(--color-muted);
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 1);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+}
+/* 코드 블록은 틀만 시안이다. 배경색과 문법 색은 6단계 하이라이팅 테마를 따른다. */
+.prose pre {
+  overflow-x: auto;
+  padding: calc(var(--spacing) * 4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  line-height: var(--leading-normal);
+  overflow-wrap: normal;
+}
+.prose pre code {
+  padding: 0;
+  background: none;
+}
+
+/* 이전·다음 글: 위아래로 쌓은 두 줄 */
+.pager {
+  display: grid;
+  margin-top: calc(var(--spacing) * 14);
+  border-top: 1px dashed var(--color-border);
+}
+.pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 0.5);
+  padding-block: calc(var(--spacing) * 4);
+  border-bottom: 1px dashed var(--color-border);
+}
+@media (min-width: 40rem) {
+  .pager-link {
+    flex-direction: row;
+    align-items: baseline;
+    gap: calc(var(--spacing) * 4);
+  }
+}
+.pager-label {
+  flex-shrink: 0;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+}
+.pager-prev .pager-label::before {
+  content: '← ';
+  font-family: var(--font-mono);
+}
+.pager-next .pager-label::after {
+  content: ' →';
+  font-family: var(--font-mono);
+}
+.pager-link:hover .pager-title {
+  text-decoration: underline;
+}
+
+/* ---- 실제 사이트와 맞춘 점 ---- */
+/* 404의 홈 링크는 강조색(4단계에서 바꿨다). */
+.not-found-links a {
+  color: var(--color-accent);
+}
+.not-found-links a:hover {
+  text-decoration: underline;
+}
+
+/* ---- 이 변경에서 새로 생기는 부분 ---- */
+/* 헤더 오른쪽: 메뉴와 언어 전환 링크. 좁은 화면에서는 둘이 함께 사이트 이름 아래 줄로 내려간다. */
+.header-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+}
+
+/* A안: 메뉴 뒤에 점선 세로선으로 나눈 글자 링크("English"/"한국어"). */
+.lang-a {
+  padding-left: calc(var(--spacing) * 4);
+  border-left: 1px dashed var(--color-border);
+  color: var(--color-muted);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+}
+.lang-a:hover {
+  color: var(--color-text);
+}
+
+/* B안: 고정폭 언어 코드 두 개("ko / en"). 지금 언어는 강조색 굵게, 다른 언어가 링크. */
+.lang-b {
+  display: flex;
+  gap: calc(var(--spacing) * 1.5);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+.lang-b [aria-current] {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+.lang-b a:hover {
+  color: var(--color-text);
+}
+
+/* C안: 메뉴의 마지막 항목. 다른 메뉴와 같은 모양(투명한 괄호 포함)이고 현재 표시는 없다. */
+
+/* 404: 제목 아래 영어 제목, 그 아래 두 언어의 홈 링크 */
+.not-found-sub {
+  margin-top: calc(var(--spacing) * -6);
+  margin-bottom: calc(var(--spacing) * 10);
+  color: var(--color-muted);
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+.not-found-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 2) calc(var(--spacing) * 6);
+}
+
+/* ---- 시안 보기용 도구 막대(사이트에는 없다) ---- */
+.mock-bar {
+  background: #1f2328;
+  color: #d0d7de;
+  font: 12px/1.6 -apple-system, BlinkMacSystemFont, sans-serif;
+  word-break: normal;
+}
+.mock-bar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 8px 20px;
+}
+.mock-bar b {
+  color: #fff;
+}
+.mock-bar a {
+  color: #9da7b3;
+  text-decoration: underline;
+}
+.mock-bar a[aria-current] {
+  color: #4ac26b;
+  font-weight: 700;
+  text-decoration: none;
+}
+.mock-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.mock-page {
+  padding: 24px 20px 48px;
+  font: 14px/1.6 -apple-system, BlinkMacSystemFont, sans-serif;
+  word-break: keep-all;
+}
+.mock-page h2 {
+  margin: 32px 0 8px;
+  font-size: 18px;
+}
+.mock-page h3 {
+  margin: 20px 0 6px;
+  font-size: 15px;
+}
+.mock-page p,
+.mock-page li {
+  max-width: 60rem;
+}
+.mock-page ul.mock-list {
+  list-style: disc;
+  padding-left: 20px;
+}
+.mock-frames {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+.mock-frames figure {
+  margin: 0;
+}
+.mock-frames figcaption {
+  color: #656d76;
+  font-size: 12px;
+}
+.mock-frames iframe {
+  display: block;
+  border: 1px solid #d0d7de;
+  background: #fff;
+}
+.mock-og {
+  display: block;
+  width: 600px;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #d0d7de;
+}
+
+/* B1안: B안을 링크 하나로 묶고 간격을 좁혔다. 지금 언어는 강조색 굵게, 마우스를 올리면 다른 언어가 본문 글자색. */
+.lang-b1,
+.lang-b2 {
+  display: inline-flex;
+  align-items: baseline;
+  gap: calc(var(--spacing) * 0.5);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+.lang-b1 .on,
+.lang-b2 .on {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+.lang-b1:hover span:not(.on),
+.lang-b2:hover span:not(.on) {
+  color: var(--color-text);
+}
+
+/* B2안: B1에 테두리를 둘러 버튼처럼 보이게 했다(코드 블록과 같은 구분선 색 테두리, radius-sm).
+   마우스를 올리면 테두리가 강조색이 된다(포트폴리오 카드의 세로선과 같은 규칙). */
+.lang-b2 {
+  padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.lang-b2:hover {
+  border-color: var(--color-accent);
+}

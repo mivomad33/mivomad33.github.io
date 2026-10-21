@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import type { PortfolioItem } from '../lib/portfolio';
 
 // 포트폴리오 카드. 포트폴리오 페이지와 홈의 최근 포트폴리오가 같이 쓴다.
 interface Props {
-  item: CollectionEntry<'portfolio'>['data'];
+  item: PortfolioItem;
   // 명칭의 제목 단계. 포트폴리오 페이지는 h2, 홈은 영역 제목(h2) 아래이므로 h3.
   headingLevel: 2 | 3;
 }

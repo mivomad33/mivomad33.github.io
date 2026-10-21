@@ -7,10 +7,25 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { ALLOW_INDEXING, siteUrl } from '../src/lib/site.ts';
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  OG_LOCALE,
+  X_DEFAULT_LOCALE,
+  localeOfPath,
+  localePath,
+  otherLocale,
+  pathWithoutLocale,
+  type Locale,
+} from '../src/lib/i18n.ts';
 
 const DIST = 'dist';
 const BLOG = 'src/content/blog';
-const OG_SOURCE = 'docs/stages/7-seo/og-image.html';
+// 언어별 OG 이미지 원본(변경 1). 원본의 한 줄 소개는 프로필의 그 언어 값과 같아야 한다.
+const OG_SOURCES: Record<Locale, string> = {
+  ko: 'docs/stages/7-seo/og-image.html',
+  en: 'docs/stages/7-seo/og-image-en.html',
+};
 const PROFILE = 'src/data/profile.yaml';
 
 // 404를 뺀 모든 페이지에 값이 있어야 하는 태그(name 또는 property).
@@ -30,7 +45,6 @@ const REQUIRED_META = [
 ];
 // 404를 뺀 모든 페이지에서 값이 정해진 태그.
 const FIXED_META: Record<string, string> = {
-  'og:locale': 'ko_KR',
   'twitter:card': 'summary_large_image',
 };
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -80,23 +94,33 @@ function pagePath(file: string): string {
 }
 
 interface Context {
-  // 글 보기 페이지 경로(/blog/<slug>/). 글 파일 목록으로 정한다.
+  // 글 보기 페이지 경로(/blog/<slug>/, /en/blog/<slug>/). 글 폴더 목록으로 정한다.
   articlePaths: Set<string>;
   profile: Record<string, unknown>;
+  // 언어마다 페이지가 쓴 og:image(언어마다 하나여야 한다)
+  ogImages: Map<Locale, Set<string>>;
 }
 
 function checkPage(
   file: string,
   html: string,
-  { articlePaths, profile }: Context,
+  { articlePaths, profile, ogImages }: Context,
 ): string | undefined {
   const where = file;
   const head = html.slice(html.indexOf('<head>'), html.indexOf('</head>'));
+  const body = html.slice(html.indexOf('</head>'));
+  const lang = attributes(html.match(tagPattern('html'))?.[0] ?? '').lang;
   const meta = new Map<string, string>();
+  // og:locale:alternate는 다른 언어마다 하나씩 있으므로 따로 모은다.
+  const localeAlternates: string[] = [];
   for (const [tag] of head.matchAll(tagPattern('meta'))) {
     const attrs = attributes(tag);
     const key = attrs.property ?? attrs.name;
     if (!key) continue;
+    if (key === 'og:locale:alternate') {
+      localeAlternates.push(attrs.content ?? '');
+      continue;
+    }
     if (meta.has(key)) fail(where, `${key} 태그가 두 번 이상 있습니다.`);
     meta.set(key, attrs.content ?? '');
   }
@@ -109,6 +133,13 @@ function checkPage(
   }
   const linkHref = (rel: string) =>
     links.find((link) => link.rel === rel)?.href;
+  // 언어별 버전(hreflang)과 언어 전환 링크(본문의 hreflang이 있는 링크). 변경 1.
+  const hreflangs = links.filter(
+    (link) => link.rel === 'alternate' && link.hreflang !== undefined,
+  );
+  const switchLinks = [...body.matchAll(tagPattern('a'))]
+    .map(([tag]) => attributes(tag))
+    .filter((attrs) => attrs.hreflang !== undefined);
   const jsonLd = [
     ...head.matchAll(
       /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
@@ -144,11 +175,17 @@ function checkPage(
     const forbidden = [...meta.keys()].filter(
       (key) => key === 'description' || /^(og|twitter|article):/.test(key),
     );
+    if (localeAlternates.length > 0) forbidden.push('og:locale:alternate');
     if (forbidden.length > 0)
       fail(where, `404에 넣지 않는 태그가 있습니다: ${forbidden.join(', ')}`);
     if (linkHref('canonical') !== undefined)
       fail(where, '404에 canonical이 있습니다.');
     if (jsonLd.length > 0) fail(where, '404에 구조화 데이터가 있습니다.');
+    // 404는 사이트에 하나라 기본 언어 페이지이고, 언어별 버전과 언어 전환 링크가 없다.
+    if (lang !== DEFAULT_LOCALE)
+      fail(where, `html lang이 ${DEFAULT_LOCALE}가 아닙니다: ${lang}`);
+    if (hreflangs.length > 0) fail(where, '404에 hreflang 링크가 있습니다.');
+    if (switchLinks.length > 0) fail(where, '404에 언어 전환 링크가 있습니다.');
     return undefined;
   }
 
@@ -161,6 +198,18 @@ function checkPage(
     if (meta.has(key) && meta.get(key) !== value)
       fail(where, `${key}가 ${value}가 아닙니다: ${meta.get(key)}`);
   }
+  checkLanguages(where, path, {
+    lang,
+    ogLocale: meta.get('og:locale'),
+    localeAlternates,
+    hreflangs,
+    switchLinks,
+  });
+  const ogImage = meta.get('og:image');
+  if (ogImage) {
+    const locale = localeOfPath(path);
+    ogImages.set(locale, (ogImages.get(locale) ?? new Set()).add(ogImage));
+  }
   if (meta.get('og:description') !== meta.get('description'))
     fail(where, 'og:description이 description과 다릅니다.');
   if (meta.get('og:site_name') !== profile.name)
@@ -169,7 +218,6 @@ function checkPage(
     fail(where, `canonical이 ${url}이 아닙니다: ${linkHref('canonical')}`);
   if (meta.get('og:url') !== url)
     fail(where, `og:url이 ${url}이 아닙니다: ${meta.get('og:url')}`);
-  const ogImage = meta.get('og:image');
   if (ogImage && !existsInDist(ogImage))
     fail(where, `og:image 파일이 사이트에 없습니다: ${ogImage}`);
 
@@ -206,6 +254,11 @@ function checkPage(
         fail(where, 'datePublished가 article:published_time과 다릅니다.');
       if (data.dateModified !== modified)
         fail(where, 'dateModified가 article:modified_time과 다릅니다.');
+      if (data.inLanguage !== localeOfPath(path))
+        fail(
+          where,
+          `구조화 데이터의 inLanguage가 ${localeOfPath(path)}가 아닙니다: ${String(data.inLanguage)}`,
+        );
     }
   } else {
     if (meta.get('og:type') !== 'website')
@@ -222,6 +275,102 @@ function checkPage(
       fail(where, '글이 아닌 페이지에 구조화 데이터가 있습니다.');
   }
   return url;
+}
+
+// 언어별 버전 링크(HTML의 hreflang 링크, sitemap의 xhtml:link)가 정한 것과 같은지.
+// 같은 언어가 두 번 있거나, 빠졌거나, 주소가 다르거나, 정해지지 않은 언어가 있으면 실패다.
+function checkAlternates(
+  where: string,
+  what: string,
+  found: [string, string][],
+  expected: Map<string, string>,
+) {
+  const hreflangs = found.map(([hreflang]) => hreflang);
+  const duplicated = hreflangs.filter(
+    (hreflang, index) => hreflangs.indexOf(hreflang) !== index,
+  );
+  if (duplicated.length > 0)
+    fail(
+      where,
+      `${what}에 같은 언어가 두 번 이상 있습니다: ${duplicated.join(', ')}`,
+    );
+  const hrefs = new Map(found);
+  for (const [hreflang, href] of expected) {
+    const actual = hrefs.get(hreflang);
+    if (actual === undefined)
+      fail(where, `${what}에 ${hreflang}가 없습니다(${href}이어야 한다).`);
+    else if (actual !== href)
+      fail(where, `${what}의 ${hreflang}가 ${href}가 아닙니다: ${actual}`);
+  }
+  for (const hreflang of hrefs.keys()) {
+    if (!expected.has(hreflang))
+      fail(where, `${what}에 정해지지 않은 언어가 있습니다: ${hreflang}`);
+  }
+}
+
+interface LanguageTags {
+  lang: string | undefined;
+  ogLocale: string | undefined;
+  localeAlternates: string[];
+  hreflangs: Record<string, string>[];
+  switchLinks: Record<string, string>[];
+}
+
+// 두 언어(변경 1): 문서 언어·og:locale이 주소의 언어와 맞고, 언어별 버전(hreflang)이 모든 언어와
+// x-default를 가리키며, 언어 전환 링크가 같은 페이지의 다른 언어 버전을 가리키는지.
+// 가리키는 페이지가 실제로 있는지도 보므로, 모든 페이지가 이 검사를 통과하면 언어별 버전이 서로를 가리킨다.
+function checkLanguages(where: string, path: string, tags: LanguageTags) {
+  const locale = localeOfPath(path);
+  const base = pathWithoutLocale(locale, path);
+  if (tags.lang !== locale)
+    fail(where, `html lang이 ${locale}가 아닙니다: ${tags.lang}`);
+  if (tags.ogLocale !== OG_LOCALE[locale])
+    fail(
+      where,
+      `og:locale이 ${OG_LOCALE[locale]}가 아닙니다: ${tags.ogLocale}`,
+    );
+  const expectedAlternates = LOCALES.filter((code) => code !== locale)
+    .map((code) => OG_LOCALE[code])
+    .toSorted()
+    .join(', ');
+  if (tags.localeAlternates.toSorted().join(', ') !== expectedAlternates)
+    fail(
+      where,
+      `og:locale:alternate가 ${expectedAlternates}가 아닙니다: ${tags.localeAlternates.join(', ')}`,
+    );
+  const expectedHreflangs = new Map<string, string>([
+    ...LOCALES.map((code): [string, string] => [
+      code,
+      siteUrl(localePath(code, base)),
+    ]),
+    ['x-default', siteUrl(localePath(X_DEFAULT_LOCALE, base))],
+  ]);
+  checkAlternates(
+    where,
+    'hreflang 링크',
+    tags.hreflangs.map((link) => [link.hreflang ?? '', link.href ?? '']),
+    expectedHreflangs,
+  );
+  for (const [hreflang, href] of expectedHreflangs) {
+    if (!existsInDist(href))
+      fail(
+        where,
+        `hreflang="${hreflang}"가 가리키는 페이지가 없습니다: ${href}`,
+      );
+  }
+  const other = otherLocale(locale);
+  const switchHref = localePath(other, base);
+  const [switchLink, ...extra] = tags.switchLinks;
+  if (!switchLink || extra.length > 0)
+    fail(
+      where,
+      `언어 전환 링크(hreflang이 있는 링크)가 ${tags.switchLinks.length}개입니다(1개여야 한다).`,
+    );
+  else if (switchLink.href !== switchHref || switchLink.hreflang !== other)
+    fail(
+      where,
+      `언어 전환 링크가 ${switchHref}(${other})가 아닙니다: ${switchLink.href}(${switchLink.hreflang})`,
+    );
 }
 
 // sitemap: 404를 뺀 모든 페이지가 있고, 그 밖의 주소는 없다.
@@ -242,7 +391,26 @@ async function checkSitemap(pageUrls: string[]) {
       continue;
     }
     const file = join(DIST, new URL(sitemap).pathname);
-    for (const url of locs(await readFile(file, 'utf8'))) listed.add(url);
+    const xml = await readFile(file, 'utf8');
+    for (const url of locs(xml)) listed.add(url);
+    // 주소마다 모든 언어 버전(xhtml:link)이 붙어 있는지(변경 1). sitemap 통합은 다른 언어 버전이
+    // 없는 주소에 링크를 붙이지 않고 넘어가므로 여기서 확인한다.
+    for (const [, block = ''] of xml.matchAll(/<url>([\s\S]*?)<\/url>/g)) {
+      const loc = locs(block)[0] ?? '';
+      const base = pathWithoutLocale(
+        localeOfPath(new URL(loc).pathname),
+        new URL(loc).pathname,
+      );
+      checkAlternates(
+        file,
+        `${loc}의 언어 버전(xhtml:link)`,
+        [...block.matchAll(tagPattern('xhtml:link'))].map(([tag]) => {
+          const attrs = attributes(tag);
+          return [attrs.hreflang ?? '', attrs.href ?? ''];
+        }),
+        new Map(LOCALES.map((code) => [code, siteUrl(localePath(code, base))])),
+      );
+    }
   }
   for (const url of pageUrls) {
     if (!listed.has(url)) fail(where, `sitemap에 페이지가 없습니다: ${url}`);
@@ -268,17 +436,24 @@ async function checkRobots() {
 }
 
 // OG 이미지 원본의 활동명·한 줄 소개가 프로필과 같은지(이미지를 다시 만들지 않으면 옛 값이 남는다).
-async function checkOgSource(profile: Record<string, unknown>) {
-  const source = await readFile(OG_SOURCE, 'utf8');
+// 원본은 언어마다 하나이고, 한 줄 소개는 그 언어의 값과 비교한다(변경 1).
+async function checkOgSource(profile: Record<string, unknown>, locale: Locale) {
+  const ogSource = OG_SOURCES[locale];
+  const source = await readFile(ogSource, 'utf8');
+  const intro = profile.intro as Record<string, unknown> | undefined;
+  const expected: Record<string, unknown> = {
+    name: profile.name,
+    intro: intro?.[locale],
+  };
   for (const key of ['name', 'intro']) {
     const raw = source.match(
       new RegExp(`data-profile="${key}"[^>]*>([^<]*)<`),
     )?.[1];
     const text = raw === undefined ? undefined : decode(raw);
-    if (text !== profile[key])
+    if (text !== expected[key])
       fail(
-        OG_SOURCE,
-        `${key}가 프로필(${PROFILE})과 다릅니다: "${text}" ≠ "${String(profile[key])}". 원본을 고치고 sh docs/stages/7-seo/make-images.sh로 이미지를 다시 만든다.`,
+        ogSource,
+        `${key}가 프로필(${PROFILE})과 다릅니다: "${text}" ≠ "${String(expected[key])}". 원본을 고치고 sh docs/stages/7-seo/make-images.sh로 이미지를 다시 만든다.`,
       );
   }
 }
@@ -287,20 +462,24 @@ const profile = parse(await readFile(PROFILE, 'utf8')) as Record<
   string,
   unknown
 >;
-// 글 파일(<slug>.md)이 없으면(글 0개) 폴더도 없을 수 있다(6단계).
+// 글마다 글 폴더(<slug>/)가 있다(변경 1). 글이 0개면 폴더도 없을 수 있다(6단계).
 const articlePaths = new Set(
-  (existsSync(BLOG) ? await readdir(BLOG) : [])
-    .filter((name) => name.endsWith('.md'))
-    .map((name) => `/blog/${name.slice(0, -'.md'.length)}/`),
+  (existsSync(BLOG) ? await readdir(BLOG, { withFileTypes: true }) : [])
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
+    .flatMap((entry) =>
+      LOCALES.map((locale) => localePath(locale, `/blog/${entry.name}/`)),
+    ),
 );
 const files = existsSync(DIST) ? await htmlFiles(DIST) : [];
 if (files.length === 0) fail(DIST, 'HTML 파일이 없습니다(빌드 결과가 없음).');
 const pageUrls: string[] = [];
 const pagePaths = new Set<string>();
+const ogImages = new Map<Locale, Set<string>>();
 for (const file of files) {
   const url = checkPage(file, await readFile(file, 'utf8'), {
     articlePaths,
     profile,
+    ogImages,
   });
   if (url) pageUrls.push(url);
   pagePaths.add(pagePath(file));
@@ -308,9 +487,37 @@ for (const file of files) {
 for (const path of articlePaths) {
   if (!pagePaths.has(path)) fail(DIST, `글 보기 페이지가 없습니다: ${path}`);
 }
+// 두 언어(변경 1): 404를 뺀 모든 페이지가 모든 언어로 있는지, 언어마다 OG 이미지가 하나이고 서로 다른지.
+for (const path of pagePaths) {
+  if (path === '/404.html') continue;
+  const base = pathWithoutLocale(localeOfPath(path), path);
+  for (const locale of LOCALES) {
+    if (!pagePaths.has(localePath(locale, base)))
+      fail(
+        DIST,
+        `${path}의 ${locale} 페이지가 없습니다: ${localePath(locale, base)}`,
+      );
+  }
+}
+for (const locale of LOCALES) {
+  const images = [...(ogImages.get(locale) ?? [])];
+  if (images.length !== 1)
+    fail(
+      DIST,
+      `${locale} 페이지의 og:image가 ${images.length}종류입니다(1종류여야 한다): ${images.join(', ')}`,
+    );
+}
+if (
+  new Set(LOCALES.map((locale) => [...(ogImages.get(locale) ?? [])][0]))
+    .size !== LOCALES.length
+)
+  fail(
+    DIST,
+    '언어마다 og:image가 달라야 합니다(이미지에 한 줄 소개가 글자로 들어 있다).',
+  );
 await checkSitemap(pageUrls);
 await checkRobots();
-await checkOgSource(profile);
+for (const locale of LOCALES) await checkOgSource(profile, locale);
 
 if (errors.length > 0) {
   console.error(`빌드 결과 검사 실패(${errors.length}건):`);
