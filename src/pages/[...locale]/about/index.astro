@@ -3,9 +3,12 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageTitle from '../../../components/PageTitle.astro';
 import Link from '../../../components/Link.astro';
 import { getProfile } from '../../../lib/profile';
+import profileImage from '../../../assets/profile.svg';
 import { localeStaticPaths, UI, type Locale } from '../../../lib/i18n';
 
 // 소개(언어마다 하나). 활동명, 한 줄 소개, 이메일, 링크. 링크가 없으면 링크 줄을 숨긴다.
+// 프로필 이미지는 넓은 화면에서 내용 오른쪽, 좁은 화면에서 제목 위에 둔다(변경 3).
+// 칸 단위 픽셀 그림이라 64px(칸 하나 3px)로 보여 칸 폭이 고르게 한다. 옆에 활동명이 있으므로 꾸밈 이미지(alt="")다.
 export function getStaticPaths() {
   return localeStaticPaths();
 }
@@ -20,32 +23,46 @@ const profile = await getProfile(locale);
 ---
 
 <BaseLayout locale={locale} title={ui.menu.about} description={profile.intro}>
-  <PageTitle>{profile.name}</PageTitle>
-  <p class="-mt-6 mb-10 text-muted">{profile.intro}</p>
-  <dl class="grid grid-cols-label gap-x-6 gap-y-3 text-sm">
-    <dt class="text-muted">{ui.email}:</dt>
-    <dd>
-      <a href={`mailto:${profile.email}`} class="text-accent hover:underline">
-        {profile.email}
-      </a>
-    </dd>
-    {
-      profile.links.length > 0 && (
-        <>
-          <dt class="text-muted">{ui.links}:</dt>
-          <dd>
-            <ul class="flex flex-wrap gap-4">
-              {profile.links.map(({ label, url }) => (
-                <li>
-                  <Link href={url} class="text-accent hover:underline">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </dd>
-        </>
-      )
-    }
-  </dl>
+  <div class="flex flex-col-reverse gap-6 sm:flex-row sm:items-start">
+    <div class="min-w-0 flex-1">
+      <PageTitle>{profile.name}</PageTitle>
+      <p class="-mt-6 mb-10 text-muted">{profile.intro}</p>
+      <dl class="grid grid-cols-label gap-x-6 gap-y-3 text-sm">
+        <dt class="text-muted">{ui.email}:</dt>
+        <dd>
+          <a
+            href={`mailto:${profile.email}`}
+            class="text-accent hover:underline"
+          >
+            {profile.email}
+          </a>
+        </dd>
+        {
+          profile.links.length > 0 && (
+            <>
+              <dt class="text-muted">{ui.links}:</dt>
+              <dd>
+                <ul class="flex flex-wrap gap-4">
+                  {profile.links.map(({ label, url }) => (
+                    <li>
+                      <Link href={url} class="text-accent hover:underline">
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </dd>
+            </>
+          )
+        }
+      </dl>
+    </div>
+    <img
+      src={profileImage.src}
+      alt=""
+      width="64"
+      height="64"
+      class="size-16 shrink-0"
+    />
+  </div>
 </BaseLayout>
