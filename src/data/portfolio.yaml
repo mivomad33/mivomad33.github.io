@@ -1,3 +1,13 @@
 # 포트폴리오. 파일에 적은 순서대로 표시하고, 홈에는 앞에서부터 3개를 보여 준다(새 항목은 맨 위에 적는다).
 # 형식: docs/design.md의 "데이터 파일 형식". 항목이 없으면 []를 적는다.
-[]
+- name: Senseful
+  description:
+    ko: 영단어를 뜻 하나씩, 예문을 번역하며 외우는 웹앱. Claude가 번역의 의미로 정답을 판정하고, FSRS가 복습 일정을 정합니다. Next.js·Postgres로 만들어 Vercel에 배포했습니다.
+    en: A web app for learning English words one sense at a time by translating example sentences. Claude grades each translation by meaning, and FSRS schedules the reviews. Built with Next.js and Postgres, deployed on Vercel.
+  links:
+    - label:
+        ko: 사이트
+        en: Site
+      url: https://senseful.vercel.app
+    - label: GitHub
+      url: https://github.com/mivomad33/senseful
