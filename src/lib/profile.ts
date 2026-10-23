@@ -1,7 +1,7 @@
 import { getEntry } from 'astro:content';
-import { localize, type Locale } from './i18n';
+import { localizeLink, type Locale } from './i18n';
 
-// 프로필 데이터(src/data/profile.yaml). 글자 값은 그 언어의 것으로 꺼내 돌려준다.
+// 프로필 데이터(src/data/profile.yaml). 글자 값과 사이트 안 링크 주소는 그 언어의 것으로 꺼내 돌려준다.
 export async function getProfile(locale: Locale) {
   const entry = await getEntry('profile', 'profile');
   if (!entry) {
@@ -11,9 +11,6 @@ export async function getProfile(locale: Locale) {
   return {
     ...rest,
     intro: intro[locale],
-    links: links.map(({ label, url }) => ({
-      label: localize(label, locale),
-      url,
-    })),
+    links: links.map((link) => localizeLink(link, locale)),
   };
 }

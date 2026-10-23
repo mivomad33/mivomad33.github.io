@@ -20,6 +20,12 @@
       "port": 4401
     },
     {
+      "name": "site-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev", "--port", "4321"],
+      "port": 4321
+    },
+    {
       "name": "site-preview",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [

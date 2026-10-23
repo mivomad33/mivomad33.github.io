@@ -11,3 +11,7 @@
       url: https://senseful.vercel.app
     - label: GitHub
       url: https://github.com/mivomad33/senseful
+    - label:
+        ko: 만든 이야기
+        en: Write-up
+      url: /blog/building-senseful/

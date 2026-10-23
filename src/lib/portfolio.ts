@@ -1,16 +1,13 @@
 import { getCollection } from 'astro:content';
-import { localize, type Locale } from './i18n';
+import { localize, localizeLink, type Locale } from './i18n';
 import { orderById } from './yaml-loader';
 
-// 포트폴리오 데이터(src/data/portfolio.yaml). 파일에 적은 순서대로, 글자 값은 그 언어의 것으로 돌려준다.
+// 포트폴리오 데이터(src/data/portfolio.yaml). 파일에 적은 순서대로, 글자 값과 사이트 안 링크 주소는 그 언어의 것으로 돌려준다.
 export async function getPortfolio(locale: Locale) {
   return orderById(await getCollection('portfolio')).map(({ data }) => ({
     name: localize(data.name, locale),
     description: data.description[locale],
-    links: data.links.map(({ label, url }) => ({
-      label: localize(label, locale),
-      url,
-    })),
+    links: data.links.map((link) => localizeLink(link, locale)),
   }));
 }
 

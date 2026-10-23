@@ -23,6 +23,18 @@ export function localePath(locale: Locale, path: string): string {
   return locale === DEFAULT_LOCALE ? path : `/${locale}${path}`;
 }
 
+// 데이터 파일의 링크(프로필, 포트폴리오)를 그 언어의 값으로 바꾼다(변경 5). 링크명은 그 언어의 것을 꺼내고,
+// 사이트 안 주소(/로 시작, 기본 언어 경로로 적는다)는 그 언어의 경로로 바꾼다. 외부 주소와 mailto:는 그대로 둔다.
+export function localizeLink(
+  link: { label: SharedOrLocalizedText; url: string },
+  locale: Locale,
+) {
+  return {
+    label: localize(link.label, locale),
+    url: link.url.startsWith('/') ? localePath(locale, link.url) : link.url,
+  };
+}
+
 // 경로에서 언어 접두어를 뗀다(/en/blog/ → /blog/). localePath의 반대다.
 export function pathWithoutLocale(locale: Locale, path: string): string {
   return locale === DEFAULT_LOCALE ? path : path.slice(`/${locale}`.length);
