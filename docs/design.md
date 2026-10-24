@@ -156,6 +156,7 @@ Astro 기본 구조를 따른다. `src/` 아래에 이 목록에 없는 폴더�
 
 - `.github/workflows/`: 검증·빌드·배포 워크플로(`deploy.yml`)
 - `.github/actions/`: 워크플로의 작업들이 같이 쓰는 단계(`setup/`: pnpm·Node·의존성 설치)
+- `.github/assets/`: README에 넣는 화면 이미지(빌드에 들어가지 않는다)
 - `.githooks/`: 저장소의 Git 훅(`pre-push`: push 전 검증). `pnpm install`의 `prepare` 스크립트가 이 폴더를 Git 훅 폴더로 연결한다([변경 1](changes/1-english-version.md)).
 - `public/`: 가공 없이 그대로 복사할 파일(파비콘, OG 이미지)
 - `src/assets/`: 페이지에서 import해 쓰는 이미지(소개 페이지의 프로필 이미지). 파일이 없으면 빌드가 실패한다.
