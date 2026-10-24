@@ -1,5 +1,24 @@
 # 포트폴리오. 파일에 적은 순서대로 표시하고, 홈에는 앞에서부터 3개를 보여 준다(새 항목은 맨 위에 적는다).
 # 형식: docs/design.md의 "데이터 파일 형식". 항목이 없으면 []를 적는다.
+- name: Wonbook
+  description:
+    ko: 금융사에서 내려받은 거래 내역 파일을 올리기만 하면 입력·분류·잔액 맞추기까지 끝나는 웹 가계부. 올린 파일을 그 기간의 정답으로 보고 덮어써 중복 없이 정리하고, Claude가 카테고리를 분류합니다. Next.js·Postgres로 만들어 Vercel에 배포했습니다.
+    en: A budgeting web app where you just upload the transaction files from your bank, and entry, categorization and balance matching are done for you. Each file is treated as the truth for its period and replaces it, so there are no duplicates, and Claude picks the categories. Built with Next.js and Postgres, deployed on Vercel.
+  links:
+    - label:
+        ko: 사이트
+        en: Site
+      url: https://wonbook.vercel.app
+    - label:
+        ko: 데모
+        en: Demo
+      url: https://wonbook.vercel.app/demo
+    - label: GitHub
+      url: https://github.com/mivomad33/wonbook
+    - label:
+        ko: 만든 이야기
+        en: Write-up
+      url: /blog/building-wonbook/
 - name: Senseful
   description:
     ko: 영단어를 뜻 하나씩, 예문을 번역하며 외우는 웹앱. Claude가 번역의 의미로 정답을 판정하고, FSRS가 복습 일정을 정합니다. Next.js·Postgres로 만들어 Vercel에 배포했습니다.
