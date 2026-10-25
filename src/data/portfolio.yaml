@@ -1,5 +1,18 @@
 # 포트폴리오. 파일에 적은 순서대로 표시하고, 홈에는 앞에서부터 3개를 보여 준다(새 항목은 맨 위에 적는다).
 # 형식: docs/design.md의 "데이터 파일 형식". 항목이 없으면 []를 적는다.
+- name:
+    ko: 전기기사 이해 노트 생성기
+    en: Electrical Engineer Exam Notes Generator
+  description:
+    ko: 공식만 나열된 전기기사 필기 요약집의 챕터를, 개념이 이어지는 이해 노트로 처음부터 새로 쓰는 Claude Code 작업 환경. 교재는 범위와 시험 표기를 확인하는 데만 쓰고, 맥락 없는 별도 에이전트가 노트를 검증합니다. 챕터 분할, 그림 추출, 기출 문제지, 필기용 PDF는 Python·Node 스크립트가 맡습니다.
+    en: A Claude Code workspace that rewrites each chapter of a formula-only summary book for the Korean Electrical Engineer exam into understanding notes where every concept leads to the next. The textbook is only used to check scope and exam notation, and separate agents with no context check the notes. Python and Node scripts handle splitting chapters, extracting figures, past exam sheets and handwriting PDFs.
+  links:
+    - label: GitHub
+      url: https://github.com/mivomad33/electrical-engineer-understanding-notes-generator
+    - label:
+        ko: 만든 이야기
+        en: Write-up
+      url: /blog/building-understanding-notes/
 - name: Wonbook
   description:
     ko: 금융사에서 내려받은 거래 내역 파일을 올리기만 하면 입력·분류·잔액 맞추기까지 끝나는 웹 가계부. 올린 파일을 그 기간의 정답으로 보고 덮어써 중복 없이 정리하고, Claude가 카테고리를 분류합니다. Next.js·Postgres로 만들어 Vercel에 배포했습니다.
