@@ -19,8 +19,9 @@
 - 저장소: GitHub `mivomad33/mivomad33.github.io`(사용자 사이트). 기본 주소가 루트(`https://mivomad33.github.io/`)라서 도메인 연결 전후로 경로(`base`)가 바뀌지 않는다. 저장소는 4단계에서 만든다.
 - SEO: sitemap은 `@astrojs/sitemap`(`astro.config.mjs`의 통합. `sitemap-index.xml`과 `sitemap-0.xml`을 만들고 404는 스스로 뺀다. 통합의 `i18n` 설정으로 주소마다 다른 언어 버전(`xhtml:link`)을 붙인다. [변경 1](changes/1-english-version.md)). 메타 태그(noindex 포함)는 공통 레이아웃에서, robots.txt는 라이브러리 없이 직접 만든다(`src/pages/robots.txt.ts`). 메타 태그 규칙은 아래 [메타 태그](#메타-태그)에 있다.
   - 사이트 주소: `src/lib/site.ts`의 `SITE` 하나를 `astro.config.mjs`의 `site`와 빌드 결과 검사가 같이 쓴다. 절대 주소는 같은 파일의 `siteUrl()`로 만든다. 8단계에서 이 값을 도메인으로 바꾼다.
-  - robots.txt에는 수집 허용 여부와 관계없이 sitemap 주소(`Sitemap: <사이트 주소>/sitemap-index.xml`)를 넣는다.
-  - 공개 전 수집 차단: `src/lib/site.ts`의 `ALLOW_INDEXING` 값 하나로 모든 페이지의 noindex와 robots.txt(`Disallow: /`)를 함께 켜고 끈다. 지금은 `false`이고 8단계에서 `true`로 바꾼다. 이유는 [4단계 문서](stages/4-foundation.md#공개-전-수집-차단)에 있다.
+  - robots.txt에는 수집 허용 여부와 관계없이 sitemap 주소(`Sitemap: <사이트 주소>/sitemap-index.xml`)를 넣는다. 맨 아래에는 Daum 웹마스터도구 인증 줄(`#DaumWebMasterTool:...`)을 둔다(8단계).
+  - 검색 엔진 소유 확인 값: `src/lib/search-verification.ts`에 모은다. Google·네이버는 홈(`/`)에만 넣는 메타 태그(`google-site-verification`, `naver-site-verification`), Daum은 robots.txt 인증 줄이다. 빌드 결과 검사(`scripts/check-build.ts`)에도 같은 값을 따로 적어 두었으므로, 값을 바꾸면 두 곳을 함께 고친다. 등록 기록은 [8단계 문서](stages/8-launch.md#하위-단계-4-공개와-검색-엔진-등록)에 있다.
+  - 공개 전 수집 차단: `src/lib/site.ts`의 `ALLOW_INDEXING` 값 하나로 모든 페이지의 noindex와 robots.txt(`Disallow: /`)를 함께 켜고 끈다. 공개 전에는 `false`였고 8단계(2026-10-25)에서 `true`로 바꿨다. 이유는 [4단계 문서](stages/4-foundation.md#공개-전-수집-차단)에 있다.
 - 검증 도구: `astro check`(타입 검사, `@astrojs/check`와 `typescript` 설치 필요), ESLint, Prettier 검사(`--check`). E2E 도구는 쓰지 않는다.
 - 실행 환경: Node 24.16 이상(`eslint-plugin-astro` 요구. Astro 7은 22.22 이상). 로컬과 CI가 같은 버전을 쓴다(`.nvmrc`의 주 버전, `package.json`의 `packageManager`의 pnpm 버전).
 - 버전: 설치할 때 공개된 지 하루 이상 지난 것 중 최신 안정 버전을 쓰되, 서로의 peer 의존성 범위 안에서 정한다. pnpm(12.x)의 기본 공급망 보호 정책(`minimumReleaseAge`, 1일)을 따르는 것이다. 악성 버전이 공개 직후 설치되는 것을 막고, 이 정책이 CI 설치에서도 lockfile을 검사하기 때문이다([4단계 문서](stages/4-foundation.md#패키지와-버전)). 지금은 TypeScript 최신(7.x)을 타입 검사·lint 도구가 지원하지 않아 6.x를 쓴다.
@@ -67,6 +68,7 @@
   - 글 보기: 위에 더해 `article:published_time`, `article:modified_time`(`updated`가 있을 때만), 구조화 데이터(JSON-LD `BlogPosting`의 `datePublished`, `dateModified`, `inLanguage`(글의 언어), 작성자는 그 언어의 소개 페이지 주소). 날짜는 `YYYY-MM-DD`.
   - 404: 설명·canonical·OG·Twitter 태그, 언어별 버전 링크와 구조화 데이터를 넣지 않는다(`notFound`). 없는 모든 주소에 같은 내용으로 나가 대표 주소가 없기 때문이다.
   - 모든 페이지: 제목, 파비콘, 공개 전 noindex([기술 스택](#기술-스택)의 공개 전 수집 차단).
+  - 홈(`/`): 검색 엔진 소유 확인 메타 태그([기술 스택](#기술-스택)의 검색 엔진 소유 확인 값). 다른 페이지에는 넣지 않는다.
 - 주소: canonical, `og:url`, `og:image`, 언어별 버전 링크는 사이트 주소(`SITE`) 기준 절대 주소다. 8단계에서 `SITE`를 바꾸면 따라 바뀐다.
 - 이미지: OG 이미지(1200×630, 언어마다 하나: 한국어 `public/og.png`, 영어 `public/og-en.png`. 그 언어의 모든 페이지가 같이 쓴다. [변경 1](changes/1-english-version.md))와 파비콘(`public/favicon.svg`, `favicon-96.png`, `apple-touch-icon.png`). 원본은 `docs/stages/7-seo/`에 있고(OG 이미지는 `og-image.html`, `og-image-en.html`) `sh docs/stages/7-seo/make-images.sh`로 만든다. OG 이미지에는 활동명과 그 언어의 한 줄 소개가 글자로 들어 있으므로, 프로필의 두 값을 바꾸면 원본도 고쳐 다시 만든다(원본 수정을 빼먹으면 빌드 결과 검사가 실패한다. 원본만 고치고 이미지를 다시 만들지 않은 것은 검사가 잡지 못한다). 이 변경은 콘텐츠만 바꾸는 커밋이 아니므로 작업용 브랜치에서 한다.
 
@@ -204,6 +206,7 @@ lint·포맷터가 자동으로 잡는 것은 적지 않는다.
   - 메타 태그: [메타 태그](#메타-태그)의 페이지 종류별 규칙(있어야 할 태그, 정해진 값(`twitter:card`, `og:site_name`, `og:description`=`description`, 주소), 404에 없어야 할 태그). 글 보기는 글 폴더(`src/content/blog/<slug>/`)가 있는 `/blog/<slug>/`, `/en/blog/<slug>/` 페이지이고, 글마다 페이지가 있는지도 본다.
   - 두 언어([변경 1](changes/1-english-version.md)): 404를 뺀 모든 페이지가 모든 언어로 있는지, `<html lang>`·`og:locale`·`og:locale:alternate`가 주소의 언어에 맞는지, 언어별 버전 링크(`ko`, `en`, `x-default`)가 실제 있는 페이지를 가리키는지(모든 페이지가 통과하면 서로를 가리킨다), 언어 전환 링크가 같은 페이지의 다른 언어 버전을 가리키는지, 언어마다 `og:image`가 하나이고 서로 다른지, 글의 구조화 데이터 `inLanguage`. 404는 기본 언어이고 언어별 버전 링크와 언어 전환 링크가 없다. 언어 목록과 경로는 `src/lib/i18n.ts`의 값을 쓴다.
   - sitemap에 404를 뺀 모든 페이지가 있고 그 밖의 주소가 없는지, 주소마다 모든 언어 버전(`xhtml:link`)이 붙어 있는지, robots.txt의 규칙(반대 규칙이 없는지 포함)과 sitemap 주소
+  - 검색 엔진 소유 확인 값(8단계): 홈에만 정한 값의 메타 태그가 있는지, robots.txt의 마지막 줄이 Daum 인증 줄인지. 기준 값은 검사 파일에 따로 적는다(앱 쪽 값이 빠지거나 바뀌면 잡기 위해서다).
   - 언어별 OG 이미지 원본(`og-image.html`, `og-image-en.html`)의 활동명·한 줄 소개(`data-profile`)가 프로필 데이터(한 줄 소개는 그 언어의 값)와 같은지
   - 외부 링크([변경 2](changes/2-external-links.md)): 모든 페이지의 `<a>` 가운데 외부 링크(`src/lib/link.ts`의 `isExternalUrl`)는 새 탭 속성(`target="_blank"`, `rel="noopener"`)과 링크 컴포넌트·md 플러그인이 만드는 마크업(링크 글자, 페이지 언어의 문구를 화면 낭독기 이름으로 가진 아이콘)을 그대로 갖는지, 외부가 아닌 링크에 `target`이 없는지. 컴포넌트·플러그인을 거치지 않은 링크를 잡는다.
   - 새 페이지를 만들면 메타 태그 규칙만 지키면 되고 검사를 고칠 필요는 없다. 메타 태그 규칙을 바꾸면 검사도 함께 고친다.

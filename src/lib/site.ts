@@ -5,9 +5,9 @@
 // GitHub Pages에 연결한 도메인이다(8단계). 기본 주소(mivomad33.github.io)는 이 주소로 넘어간다.
 export const SITE = 'https://mivomad33.dev';
 
-// 검색 엔진 수집 허용 여부. 공개 전에는 false로 두어 모든 페이지에 noindex를 넣고 robots.txt로 전체를 막는다.
-// 8단계(공개)에서 true로 바꾼다.
-export const ALLOW_INDEXING = false;
+// 검색 엔진 수집 허용 여부. false면 모든 페이지에 noindex를 넣고 robots.txt로 전체를 막는다.
+// 공개 전에는 false였고, 8단계(공개)에서 true로 바꿨다.
+export const ALLOW_INDEXING = true;
 
 // 사이트 안 경로(/로 시작)를 SITE 기준 절대 주소로 바꾼다(canonical, OG, sitemap 주소 등).
 export function siteUrl(path: string): string {

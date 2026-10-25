@@ -8,6 +8,7 @@ import Link from '../components/Link.astro';
 import { getProfile } from '../lib/profile';
 import { ALLOW_INDEXING, siteUrl } from '../lib/site';
 import { OG_IMAGE, blogPostingJsonLd, type ArticleDates } from '../lib/seo';
+import { SITE_VERIFICATION_META } from '../lib/search-verification';
 import { formatDate } from '../lib/format-date';
 import {
   DEFAULT_LOCALE,
@@ -73,6 +74,8 @@ const menu = (['portfolio', 'blog', 'about'] as const).map((key) => ({
 }));
 // 현재 메뉴: 주소가 메뉴 주소로 시작하면 그 메뉴다(글 보기 /blog/<slug>/는 "블로그"). 홈은 표시 없음.
 const pathname = Astro.url.pathname;
+// 검색 엔진 소유 확인 태그는 콘솔에 등록한 주소인 홈(/)에만 넣는다(8단계).
+const verificationMeta = pathname === '/' ? SITE_VERIFICATION_META : [];
 const isCurrent = (href: string) => pathname.startsWith(href);
 
 // 언어 전환 링크(변경 1): 지금 페이지의 다른 언어 버전으로 가는 링크 하나. 화면에는 언어 코드를
@@ -101,6 +104,11 @@ const year = new Date().getFullYear();
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {!ALLOW_INDEXING && <meta name="robots" content="noindex, nofollow" />}
+    {
+      verificationMeta.map(({ name, content }) => (
+        <meta name={name} content={content} />
+      ))
+    }
     <title>{pageTitle}</title>
     <link rel="icon" href="/favicon-96.png" sizes="96x96" type="image/png" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

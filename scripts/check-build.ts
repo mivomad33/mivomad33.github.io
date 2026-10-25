@@ -28,6 +28,16 @@ import {
 } from '../src/lib/link.ts';
 
 const DIST = 'dist';
+
+// 검색 엔진 소유 확인 값(8단계). 앱 코드(src/lib/search-verification.ts)의 값을 가져다 쓰지 않고
+// 여기에 따로 적는다. 앱 쪽 값이 빠지거나 바뀌면 검사가 잡게 하기 위해서다. 값을 바꾸면 두 곳을 함께 고친다.
+// 메타 태그는 홈(/)에만 있고, Daum 인증 줄은 robots.txt의 마지막 줄이다.
+const EXPECTED_VERIFICATION_META = new Map([
+  ['google-site-verification', 'ufokYjzwNsn16dwZOu1vXYfypS89gMRuKjH0k9JATHc'],
+  ['naver-site-verification', '76fc5cada79ecd01270e406218364f6d9a679236'],
+]);
+const EXPECTED_DAUM_LINE =
+  '#DaumWebMasterTool:fc660409386d824914e6d26c3fae6b0a778fb6c44e66a59f42e2f852dc3c3b81:kHsTc7yt7rZFR+42wFNLLw==';
 const BLOG = 'src/content/blog';
 // 언어별 OG 이미지 원본(변경 1). 원본의 한 줄 소개는 프로필의 그 언어 값과 같아야 한다.
 const OG_SOURCES: Record<Locale, string> = {
@@ -177,6 +187,15 @@ function checkPage(
         ? 'ALLOW_INDEXING이 true인데 noindex가 있습니다.'
         : 'ALLOW_INDEXING이 false인데 noindex가 없습니다.',
     );
+  // 검색 엔진 소유 확인 태그: 홈에만 정한 값으로 있다.
+  const isHome = file === join(DIST, 'index.html');
+  for (const [name, content] of EXPECTED_VERIFICATION_META) {
+    const actual = meta.get(name);
+    if (isHome && actual !== content)
+      fail(where, `${name} 값이 정한 값과 다릅니다: "${actual ?? ''}"`);
+    if (!isHome && actual !== undefined)
+      fail(where, `홈이 아닌 페이지에 ${name}가 있습니다.`);
+  }
   checkLinks(where, body, lang);
 
   // 404: 주소를 대표하는 태그를 넣지 않는다.
@@ -479,6 +498,9 @@ async function checkRobots() {
     fail(where, `ALLOW_INDEXING과 반대인 ${opposite}가 있습니다.`);
   const sitemap = `Sitemap: ${siteUrl('/sitemap-index.xml')}`;
   if (!lines.includes(sitemap)) fail(where, `${sitemap}가 없습니다.`);
+  const lastLine = lines.filter((line) => line.trim() !== '').at(-1);
+  if (lastLine !== EXPECTED_DAUM_LINE)
+    fail(where, `마지막 줄이 Daum 인증 줄이 아닙니다: "${lastLine ?? ''}"`);
 }
 
 // OG 이미지 원본의 활동명·한 줄 소개가 프로필과 같은지(이미지를 다시 만들지 않으면 옛 값이 남는다).
