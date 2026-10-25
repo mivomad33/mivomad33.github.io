@@ -113,9 +113,9 @@
 ### 결과(2026-10-25)
 
 - 배포: main 머지 뒤 검증·빌드·배포가 성공했다. 운영 사이트의 모든 페이지에서 noindex가 빠졌고, robots.txt는 `Allow: /`, sitemap 주소, Daum 인증 줄 순서다. 홈에만 Google·네이버 메타 태그가 있다. 앱의 값을 일부러 바꾸면 빌드 결과 검사가 실패하는 것도 확인했다.
-- Google: 소유권 확인됨(HTML 태그). `sitemap-index.xml` 제출, 상태 성공. 색인 요청은 12개 중 9개를 했고, `/en/portfolio/`, `/en/blog/building-senseful/`, `/en/blog/building-wonbook/`는 계정 하루 할당량을 넘어 하지 못했다(사이트맵으로도 수집된다). 다음 날 이 3개를 요청한다.
+- Google: 소유권 확인됨(HTML 태그). `sitemap-index.xml` 제출, 상태 성공. 색인 요청은 12개 중 9개를 했고, `/en/portfolio/`, `/en/blog/building-senseful/`, `/en/blog/building-wonbook/`는 계정 하루 할당량을 넘어 하지 못했다. 사이트맵(성공)과 한국어 페이지의 hreflang·언어 전환 링크로 수집되므로 따로 요청하지 않는다(2026-10-25 사용자 결정).
 - Bing: Search Console에서 가져왔다(mivomad33 Google 계정, Search Console 읽기 권한 동의). 사이트맵이 함께 들어와 상태 Success. URL 제출로 12개를 제출했다.
 - 네이버: 사용자가 소유확인, 사이트맵 제출(`https://mivomad33.dev/sitemap-index.xml`), 웹 페이지 수집 요청 12개를 했다.
 - 다음: 로봇룰 테스트에서 인증 완료. 사용자가 PIN으로 로그인했고, 대시보드에서 응답코드 200, 수집 가능을 확인했다. 수집 Seed URL(사이트맵)에 `https://mivomad33.dev/sitemap-index.xml`, 문서등록에 12개를 요청했다.
-- 남은 일: Google 색인 요청 3개(다음 날), 공개 뒤 확인할 항목(Google Search Console에 hreflang 오류가 없는지, 색인이 잡혔는지. 며칠~몇 주 뒤), 운영 흐름 확인(다음 실제 콘텐츠).
+- 남은 일: 공개 뒤 확인할 항목(Google Search Console에 hreflang 오류가 없는지, 색인이 잡혔는지. 며칠~몇 주 뒤), 운영 흐름 확인(다음 실제 콘텐츠).
 - 색인 확인 방법: Google은 Search Console의 페이지 보고서나 URL 검사, Bing은 URL Inspection, 네이버는 서치어드바이저 리포트, 다음은 웹마스터도구 대시보드. `site:mivomad33.dev` 검색으로도 볼 수 있다.
