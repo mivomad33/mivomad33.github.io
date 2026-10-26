@@ -1,6 +1,19 @@
 # 포트폴리오. 파일에 적은 순서대로 표시하고, 홈에는 앞에서부터 3개를 보여 준다(새 항목은 맨 위에 적는다).
 # 형식: docs/design.md의 "데이터 파일 형식". 항목이 없으면 []를 적는다.
 - name:
+    ko: OTT 카드 플레이어
+    en: OTT Card Player
+  description:
+    ko: NFC 카드를 리더기에 올리면 넷플릭스나 디즈니 플러스의 그 영상 한 편이 재생되는, 아이를 위한 DVD 같은 Windows 프로그램. 한 편이 끝나면 다음 화로 넘어가지 않고 대기 화면으로 돌아가며, 영상 주소로 인쇄용 카드 표지도 만듭니다. Python으로 만들었고, 설치된 Chrome을 Playwright로 조작하고 리더기와는 PC/SC로 직접 주고받습니다.
+    en: A DVD-like Windows program for kids where putting an NFC card on a reader plays that one Netflix or Disney+ video. When an episode ends, it goes back to an idle screen instead of moving on to the next one, and it also makes printable card covers from video addresses. Built with Python, it controls the installed Chrome with Playwright and talks to the reader directly over PC/SC.
+  links:
+    - label: GitHub
+      url: https://github.com/mivomad33/ott-card-player
+    - label:
+        ko: 만든 이야기
+        en: Write-up
+      url: /blog/building-ott-card-player/
+- name:
     ko: 전기기사 이해 노트 생성기
     en: Electrical Engineer Exam Notes Generator
   description:
