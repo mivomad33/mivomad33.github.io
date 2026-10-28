@@ -2,8 +2,8 @@
 # 형식: docs/design.md의 "데이터 파일 형식". 항목이 없으면 []를 적는다.
 - name: thread-manager
   description:
-    ko: 내 프로젝트들의 새 커밋을 읽고 Threads에 올릴 글 초안을 그림까지 붙여 써 두는 Claude Code 워크플로. 초안은 예약 실행이 쓰고, 사람이 대화에서 승인한 글만 Threads 공식 API로 올라갑니다. Python·Node 스크립트가 커밋 수집, 초안 검사, 스크린샷, 게시를 맡습니다.
-    en: A Claude Code workflow that reads new commits in my projects and drafts Threads posts with pictures attached. A scheduled run writes the drafts, and only the ones I approve in the conversation go up through the official Threads API. Python and Node scripts handle collecting commits, checking drafts, screenshots and posting.
+    ko: 내 프로젝트들의 새 커밋을 읽고 그림까지 붙인 Threads 글을 써서 올리는 Claude Code 워크플로. 평일마다 예약 실행이 초안을 쓰고 그중 가장 좋은 하나를 Threads 공식 API로 올린 뒤 알려 주며, 사람은 올라간 글을 보고 필요하면 지웁니다. Python·Node 스크립트가 커밋 수집, 초안 검사, 스크린샷, 게시를 맡습니다.
+    en: A Claude Code workflow that reads new commits in my projects, writes Threads posts with pictures attached and posts them. Every weekday a scheduled run writes drafts, posts the best one through the official Threads API and sends me the link, and I check what went up and delete it if needed. Python and Node scripts handle collecting commits, checking drafts, screenshots and posting.
   links:
     - label: Threads
       url: https://www.threads.com/@mivomad33
