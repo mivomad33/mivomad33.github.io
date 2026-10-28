@@ -1,5 +1,18 @@
 # 포트폴리오. 파일에 적은 순서대로 표시하고, 홈에는 앞에서부터 3개를 보여 준다(새 항목은 맨 위에 적는다).
 # 형식: docs/design.md의 "데이터 파일 형식". 항목이 없으면 []를 적는다.
+- name: thread-manager
+  description:
+    ko: 내 프로젝트들의 새 커밋을 읽고 Threads에 올릴 글 초안을 그림까지 붙여 써 두는 Claude Code 워크플로. 초안은 예약 실행이 쓰고, 사람이 대화에서 승인한 글만 Threads 공식 API로 올라갑니다. Python·Node 스크립트가 커밋 수집, 초안 검사, 스크린샷, 게시를 맡습니다.
+    en: A Claude Code workflow that reads new commits in my projects and drafts Threads posts with pictures attached. A scheduled run writes the drafts, and only the ones I approve in the conversation go up through the official Threads API. Python and Node scripts handle collecting commits, checking drafts, screenshots and posting.
+  links:
+    - label: Threads
+      url: https://www.threads.com/@mivomad33
+    - label: GitHub
+      url: https://github.com/mivomad33/thread-manager
+    - label:
+        ko: 만든 이야기
+        en: Write-up
+      url: /blog/building-thread-manager/
 - name:
     ko: OTT 카드 플레이어
     en: OTT Card Player
