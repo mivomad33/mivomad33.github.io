@@ -1,5 +1,16 @@
 # 포트폴리오. 파일에 적은 순서대로 표시하고, 홈에는 앞에서부터 3개를 보여 준다(새 항목은 맨 위에 적는다).
 # 형식: docs/design.md의 "데이터 파일 형식". 항목이 없으면 []를 적는다.
+- name: netflix-subtitle-study
+  description:
+    ko: 넷플릭스의 영어·한국어 자막으로 대본을 만들어 영상을 보며 문장 단위로 공부하는 크롬 확장 프로그램. 영상을 페이지로 나눠 5단계 학습을 회차별로 기록하고, 대사와 시간을 함께 보며 필요한 부분만 빠르게 넘겨 볼 수 있습니다. React·TypeScript와 Manifest V3로 만들었습니다.
+    en: A Chrome extension that builds a script from Netflix's English and Korean subtitles so you can study a video sentence by sentence as you watch. It splits videos into pages, records five study steps per round, and skips by both lines and time so you can move quickly through only the parts you need. Built with React, TypeScript and Manifest V3.
+  links:
+    - label: GitHub
+      url: https://github.com/mivomad33/netflix-subtitle-study
+    - label:
+        ko: 만든 이야기
+        en: Write-up
+      url: /blog/building-netflix-subtitle-study/
 - name: thread-manager
   description:
     ko: 내 프로젝트들의 새 커밋을 읽고 그림까지 붙인 Threads 글을 써서 올리는 Claude Code 워크플로. 평일마다 예약 실행이 초안을 쓰고 그중 가장 좋은 하나를 Threads 공식 API로 올린 뒤 알려 주며, 사람은 올라간 글을 보고 필요하면 지웁니다. Python·Node 스크립트가 커밋 수집, 초안 검사, 스크린샷, 게시를 맡습니다.
