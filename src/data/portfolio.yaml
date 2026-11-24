@@ -71,13 +71,9 @@
       url: /blog/building-wonbook/
 - name: Senseful
   description:
-    ko: 영단어를 뜻 하나씩, 예문을 번역하며 외우는 웹앱. Claude가 번역의 의미로 정답을 판정하고, FSRS가 복습 일정을 정합니다. Next.js·Postgres로 만들어 Vercel에 배포했습니다.
-    en: A web app for learning English words one sense at a time by translating example sentences. Claude grades each translation by meaning, and FSRS schedules the reviews. Built with Next.js and Postgres, deployed on Vercel.
+    ko: 영단어를 뜻 하나씩, 예문을 번역하며 외우는 웹앱. Claude가 번역의 의미로 정답을 판정하고, FSRS가 복습 일정을 정합니다. Next.js·Postgres로 만들어 Vercel에서 운영하다 2026년 11월에 종료했습니다.
+    en: A web app for learning English words one sense at a time by translating example sentences. Claude grades each translation by meaning, and FSRS schedules the reviews. Built with Next.js and Postgres and run on Vercel until it was shut down in November 2026.
   links:
-    - label:
-        ko: 사이트
-        en: Site
-      url: https://senseful.vercel.app
     - label: GitHub
       url: https://github.com/mivomad33/senseful
     - label:

@@ -4,12 +4,14 @@ description: 난이도를 고르지도, 단어를 입력하지도 않고 예문�
 date: 2026-10-23
 ---
 
+> Senseful은 2026년 11월에 운영을 종료했습니다. 코드는 [GitHub](https://github.com/mivomad33/senseful)에 보관해 두었습니다.
+
 영단어를 Anki로 공부하다 두 가지가 계속 불편했습니다.
 
 - 카드를 볼 때마다 Again, Hard, Good, Easy 중 하나를 직접 골라야 합니다.
 - 단어, 뜻, 예문을 직접 찾아 입력해야 합니다.
 
-그래서 문제를 풀기만 하면 되는 앱을 만들었습니다. 이름은 [Senseful](https://senseful.vercel.app)입니다. 단어를 뜻(sense) 하나씩 배운다는 뜻입니다.
+그래서 문제를 풀기만 하면 되는 앱을 만들었습니다. 이름은 Senseful입니다. 단어를 뜻(sense) 하나씩 배운다는 뜻입니다.
 
 ![Senseful 화면 세 개: 영어 예문을 한국어로 번역해 입력하는 학습 카드, 맞음 판정과 정답 번역·판정 이유, 오늘의 학습과 최근 7일 기록이 있는 홈](./images/screens.jpg)
 
@@ -67,9 +69,6 @@ date: 2026-10-23
 
 개발은 Claude Code로 했습니다. 결정할 때마다 이유를 문서에 남기고, 큰 작업은 명세서를 먼저 써서 Claude가 끝까지 구현하게 했습니다. 위의 검증들도 그 과정에서 만든 것입니다.
 
-## 써 보기
+## 코드
 
-- 사이트: [senseful.vercel.app](https://senseful.vercel.app)
-- 코드: [GitHub](https://github.com/mivomad33/senseful)
-
-화면은 한국어이고, 하루 판정 횟수에 한도가 있는 베타입니다.
+- [GitHub](https://github.com/mivomad33/senseful)(보관됨)

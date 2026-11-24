@@ -4,12 +4,14 @@ description: I built a vocabulary app where you don't rate difficulty or type in
 date: 2026-10-23
 ---
 
+> Senseful was shut down in November 2026. The code is archived on [GitHub](https://github.com/mivomad33/senseful).
+
 I was studying English vocabulary with Anki, and two things kept bothering me.
 
 - Every card asks me to pick Again, Hard, Good or Easy myself.
 - I have to look up and type in the words, meanings and example sentences myself.
 
-So I built an app where all I do is answer. It's called [Senseful](https://senseful.vercel.app), because you learn a word one sense at a time.
+So I built an app where all I do is answer. It's called Senseful, because you learn a word one sense at a time.
 
 ![Three Senseful screens (in Korean): a study card where you type a Korean translation of an English sentence, a "correct" verdict with the model translation and the reason, and the home screen with today's study and the last 7 days](./images/screens.jpg)
 
@@ -69,9 +71,6 @@ At first it ran only on my Mac, with no login, a local database, and a Dock icon
 
 I built it with Claude Code. I wrote down the reason for each decision, and for large pieces of work I wrote a spec first and had Claude implement it to the end. The tests above came out of that process.
 
-## Try it
+## Code
 
-- Site: [senseful.vercel.app](https://senseful.vercel.app)
-- Code: [GitHub](https://github.com/mivomad33/senseful)
-
-It's a beta with a daily grading limit.
+- [GitHub](https://github.com/mivomad33/senseful) (archived)
